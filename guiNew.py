@@ -68,6 +68,8 @@ class MainWindow(QMainWindow):
         # top left of rectangle becomes top left of window centering it
         self.move(qr.topLeft())
 
+        #test
+
 
     # Funktion muss in die Klasse
 
