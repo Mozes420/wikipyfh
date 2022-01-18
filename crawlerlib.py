@@ -5,6 +5,9 @@ import pandas as pd
 import datetime
 import re
 import urllib
+import shutil
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 
 def getSoup(wikipage):
 	#get page to soup
@@ -150,6 +153,40 @@ def getImgCnt(wikipage):
 	#get number of images in the article
 	img_count = len(body.findAll('img'))
 	return img_count
+	
+def getImages(wikipage):
+			
+	soup = getSoup(wikipage)
+	body = soup.select('#mw-content-text > div.mw-parser-output')[0]
+	ref_id = ['"References"', '"Notes"', '"Sources"', '"External_links"','"Notes,_citations,_and_references"', '"Bibliography"', '"See_also"', '"Further_reading"', '"Works_cited"']
+	for id in ref_id:
+		try:
+			body_str = str(body).split(f'<span class="mw-headline" id={id}')[0]
+			body = BeautifulSoup(body_str, 'html.parser')
+			#body.find('span', {'class':'mw-headline', 'id':id}).decompose()
+		except:
+			print(id+': No such element found!')
+			
+
+	imgs = body.findAll('img')
+	img_links = {}
+	for img in imgs:
+		try:
+			r = requests.get('http://'+(img['src'].strip('/')), stream=True)
+			img_link = 'http://'+(img['src'].strip('/'))
+			img_title = img['alt']
+			img_links[img_title] = img_link
+			with open(f'images/{img_title}.jpg', 'wb') as f:
+				r.raw.decode_content = True
+				shutil.copyfileobj(r.raw,f)
+
+			img = mpimg.imread(f'images/{img_title}.jpg')
+			imgplot = plt.imshow(img)
+			plt.show()
+
+		except:
+			pass
+	return img_links
 	
 def getRevisions(wikititle):
 	url = "https://en.wikipedia.org/w/api.php?action=query&format=xml&prop=revisions&rvlimit=500&titles="+wikititle 
