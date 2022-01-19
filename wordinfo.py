@@ -1,1 +1,134 @@
-{"nbformat":4,"nbformat_minor":0,"metadata":{"colab":{"name":"wordinfo.py","provenance":[],"authorship_tag":"ABX9TyO+05pgtQJe7UYVTceu2njy"},"kernelspec":{"name":"python3","display_name":"Python 3"},"language_info":{"name":"python"}},"cells":[{"cell_type":"code","source":["pip install wikipedia"],"metadata":{"id":"BeiFI7bDLWm8"},"execution_count":null,"outputs":[]},{"cell_type":"code","source":["import requests\n","import wikipedia\n","import nltk\n","nltk.download('punkt')\n","nltk.download('averaged_perceptron_tagger')\n","nltk.download('maxent_ne_chunker')\n","nltk.download('words')\n","import re\n","import numpy as np\n","import matplotlib.pyplot as plt\n","import matplotlib as mpl"],"metadata":{"id":"rpEVzSqvLCj0"},"execution_count":null,"outputs":[]},{"cell_type":"code","source":["# Funktion zum Erhalten der Wikipedia-URL, erlaubt bis zu 2 Tippfehler und wirft bestes Ergebnis aus: \n","\n","def getURL(keyword):\n","  S = requests.Session()\n","  URL = \"https://en.wikipedia.org/w/api.php\"\n","  PARAMS = {\n","    \"action\": \"opensearch\",\n","    \"search\": keyword,\n","    \"limit\": \"1\",\n","    \"format\": \"json\", \n","    'profile': 'fuzzy'\n","    }\n","  R = S.get(url=URL, params=PARAMS)\n","  got = R.json()\n","  wikititle = got[3]\n","  wt1 = ''.join(str(e) for e in wikititle)\n","  #print(wt1)\n","  return wt1"],"metadata":{"id":"h0Nk2S7dK1D9","executionInfo":{"status":"ok","timestamp":1642578435948,"user_tz":-60,"elapsed":398,"user":{"displayName":"Nina Pasku","photoUrl":"https://lh3.googleusercontent.com/a/default-user=s64","userId":"16458151178381650551"}}},"execution_count":55,"outputs":[]},{"cell_type":"code","source":["wikiurl = getURL('natural language processin')"],"metadata":{"id":"NBM5fE8wLINl","executionInfo":{"status":"ok","timestamp":1642578436347,"user_tz":-60,"elapsed":3,"user":{"displayName":"Nina Pasku","photoUrl":"https://lh3.googleusercontent.com/a/default-user=s64","userId":"16458151178381650551"}}},"execution_count":56,"outputs":[]},{"cell_type":"code","source":["# vereinfachte Funktion zum Erhalten des reinen Seitentextes (ohne Rücksichtnahme auf Formeln, Verweise etc. -> werden mit NLTK-Funktion in Folge entfernt)\n","\n","def getBlankText(keyword):\n","  url = getURL(keyword)\n","  x = url.split(sep=\"/\", maxsplit=-1)[-1:]\n","  page = wikipedia.page(x[-1:])\n","  content = page.content.replace('\\n', '')\n","  print(page)\n","  print(content[0:50],'...')\n","  return content"],"metadata":{"id":"QS0vs3UlLSB8","executionInfo":{"status":"ok","timestamp":1642578437160,"user_tz":-60,"elapsed":1,"user":{"displayName":"Nina Pasku","photoUrl":"https://lh3.googleusercontent.com/a/default-user=s64","userId":"16458151178381650551"}}},"execution_count":57,"outputs":[]},{"cell_type":"code","source":["page1 = getBlankText('natural langage processing')"],"metadata":{"colab":{"base_uri":"https://localhost:8080/"},"id":"iI8VsE5_MROs","executionInfo":{"status":"ok","timestamp":1642578441259,"user_tz":-60,"elapsed":1349,"user":{"displayName":"Nina Pasku","photoUrl":"https://lh3.googleusercontent.com/a/default-user=s64","userId":"16458151178381650551"}},"outputId":"ad802fe0-4c05-42c9-8437-8fa54d403f9c"},"execution_count":58,"outputs":[{"output_type":"stream","name":"stdout","text":["<WikipediaPage 'Natural language processing'>\n","Natural language processing (NLP) is a subfield of ...\n"]}]},{"cell_type":"code","source":["# Funktion zum Erhalten der Vokabeldichte, inkl. Ausschließen von Sonderzeichen, Abkürzungen, Füllwörtern etc. via NLTK\n","\n","def getVD(keyword):\n","  url = getURL(keyword)\n","  text = getBlankText(keyword)\n","  tokens = nltk.word_tokenize(text)\n","  tagged = nltk.pos_tag(tokens)\n","  nn = []\n","  ok = 'NN' \n","  for i in tagged:\n","    if ok == i[1]:\n","      nn.append(i[0])\n","  nn1 = [re.sub('[^a-zA-Z0-9]+', '', _) for _ in nn]\n","  nn2 = []\n","  for i in nn1:\n","    if len(i) > 2:\n","      nn2.append(i)\n","  VD = len(np.unique(nn2)) / len(nn2)\n","  print('vocabulary density: ', VD)\n","  return VD"],"metadata":{"id":"A2XxuHB8MWeN","executionInfo":{"status":"ok","timestamp":1642581883663,"user_tz":-60,"elapsed":437,"user":{"displayName":"Nina Pasku","photoUrl":"https://lh3.googleusercontent.com/a/default-user=s64","userId":"16458151178381650551"}}},"execution_count":76,"outputs":[]},{"cell_type":"code","source":["getVD('natural language processing')"],"metadata":{"colab":{"base_uri":"https://localhost:8080/"},"id":"uV3hexvgQ1WC","executionInfo":{"status":"ok","timestamp":1642578751523,"user_tz":-60,"elapsed":2165,"user":{"displayName":"Nina Pasku","photoUrl":"https://lh3.googleusercontent.com/a/default-user=s64","userId":"16458151178381650551"}},"outputId":"6179097d-3a0a-462d-936a-4781b29e0a17"},"execution_count":72,"outputs":[{"output_type":"stream","name":"stdout","text":["<WikipediaPage 'Natural language processing'>\n","Natural language processing (NLP) is a subfield of ...\n","vocabulary density:  0.4387019230769231\n"]}]},{"cell_type":"code","source":["# Funktion zum Erhalten der Wörter pro Satz; \n","\n","##### TODO: Kontrolle, ob weitere Satzenden definiert werden müssen #####\n","\n","def getWPS(keyword):\n","  url = getURL(keyword)\n","  text = getBlankText(keyword)\n","  words = text\n","  sentences = [[]]\n","  ends = set(\".?!;\")\n","  for word in words:\n","    if word in ends: sentences.append([])\n","    else: sentences[-1].append(word)\n","  if sentences[0]:\n","    if not sentences[-1]: sentences.pop()\n","    wps = sum(len(s) for s in sentences)/len(sentences)\n","    print(\"average words per sentence: \", wps)\n","    return wps"],"metadata":{"id":"4Cgmrr3ORGij","executionInfo":{"status":"ok","timestamp":1642581887382,"user_tz":-60,"elapsed":504,"user":{"displayName":"Nina Pasku","photoUrl":"https://lh3.googleusercontent.com/a/default-user=s64","userId":"16458151178381650551"}}},"execution_count":77,"outputs":[]},{"cell_type":"code","source":["getWPS('natural language processin')"],"metadata":{"colab":{"base_uri":"https://localhost:8080/"},"id":"kAIQvjJxUGlZ","executionInfo":{"status":"ok","timestamp":1642578732189,"user_tz":-60,"elapsed":1917,"user":{"displayName":"Nina Pasku","photoUrl":"https://lh3.googleusercontent.com/a/default-user=s64","userId":"16458151178381650551"}},"outputId":"2e85379f-9822-465c-a5a7-17ec188bfe1c"},"execution_count":70,"outputs":[{"output_type":"stream","name":"stdout","text":["<WikipediaPage 'Natural language processing'>\n","Natural language processing (NLP) is a subfield of ...\n","average words per sentence:  114.7243816254417\n"]}]},{"cell_type":"code","source":["# Funktion zum Plotten von wps und vd \n","\n","##### TODO: evtl. noch Radius normalisiert darstellen, im Moment noch durch Kommaverschiebung gelöst #####\n","\n","def getWordPlot(keyword):\n","  VD = getVD(keyword)\n","  wps = getWPS(keyword)\n","\n","  fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(8, 4)) \n","  [axi.set_axis_off() for axi in ax.ravel()]\n","\n","  cmap = mpl.cm.cool\n","  norm = mpl.colors.Normalize(vmin=0, vmax=5)\n","\n","  ax[0,0] = fig.add_subplot()\n","  wpscircle = plt.Circle((0.1, 0.1 ), radius=wps/10, fill=True, color = cmap(norm(wps/10)))\n","  ax[0,0].add_patch(wpscircle)\n","  label = ax[0,0].annotate('WpS', xy = (0.1, 0.1), fontsize = 15, ha='center')\n","  ax[0,0].set_aspect(1)\n","  ax[0,0].autoscale_view()\n","  ax[0,0].axis('off')\n","\n","  ax[0,1] = fig.add_subplot()\n","  vdcircle = plt.Circle((10.1, 0.1 ), radius=VD*10, fill=True, color = cmap(norm(VD*10)))\n","  ax[0,1].add_patch(vdcircle)\n","  label = ax[0,1].annotate('VD', xy = (10.1, 0.1), fontsize = 15, ha='center')\n","  ax[0,1].set_aspect(1)\n","  ax[0,1].autoscale_view()\n","  ax[0,1].axis('off')\n","\n","  fig, ax = plt.subplots(figsize=(8, 0.5))\n","  fig.subplots_adjust(bottom=0.5)\n","\n","  cbar = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap),cax=ax, orientation='horizontal')\n","\n","  cbar.set_ticks(np.arange(0, 10, 2.5))\n","  cbar.set_ticklabels(['low', 'medium', 'high'])\n","\n","  plt.show()"],"metadata":{"id":"3zLJ11lIUJSy","executionInfo":{"status":"ok","timestamp":1642581897071,"user_tz":-60,"elapsed":403,"user":{"displayName":"Nina Pasku","photoUrl":"https://lh3.googleusercontent.com/a/default-user=s64","userId":"16458151178381650551"}}},"execution_count":78,"outputs":[]},{"cell_type":"code","source":["getWordPlot('natural language processing')"],"metadata":{"colab":{"base_uri":"https://localhost:8080/","height":442},"id":"sosrv85Igbrf","executionInfo":{"status":"ok","timestamp":1642581902562,"user_tz":-60,"elapsed":3878,"user":{"displayName":"Nina Pasku","photoUrl":"https://lh3.googleusercontent.com/a/default-user=s64","userId":"16458151178381650551"}},"outputId":"08a905c4-65b9-4724-bc70-042764be9134"},"execution_count":79,"outputs":[{"output_type":"stream","name":"stdout","text":["<WikipediaPage 'Natural language processing'>\n","Natural language processing (NLP) is a subfield of ...\n","vocabulary density:  0.4387019230769231\n","<WikipediaPage 'Natural language processing'>\n","Natural language processing (NLP) is a subfield of ...\n","average words per sentence:  114.7243816254417\n"]},{"output_type":"stream","name":"stderr","text":["/usr/local/lib/python3.7/dist-packages/ipykernel_launcher.py:21: MatplotlibDeprecationWarning: Adding an axes using the same arguments as a previous axes currently reuses the earlier instance.  In a future version, a new instance will always be created and returned.  Meanwhile, this warning can be suppressed, and the future behavior ensured, by passing a unique label to each axes instance.\n"]},{"output_type":"display_data","data":{"image/png":"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\n","text/plain":["<Figure size 576x288 with 5 Axes>"]},"metadata":{"needs_background":"light"}},{"output_type":"display_data","data":{"image/png":"iVBORw0KGgoAAAANSUhEUgAAAeAAAAAtCAYAAAB21bhLAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4yLjIsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy+WH4yJAAAFBElEQVR4nO3dX4hc5RnH8e9PC0a0WDStiLSE0oKKqMVYEFQoiAQRC9oa2suACIKtF0HEiyK2vepFSkGkFawXLUovGiq1VLElTVBK/lRNjDG1ZvVCNLLtTWNrapPHi3MCkzXZndmZ3Xc2+/3AMmfmPed5n92dd55z3jlnJlWFJElaXme1TkCSpNXIAixJUgMWYEmSGrAAS5LUgAVYkqQGLMCSJDXwmXEDZMOGYnb20w391U2Zb+Mh1zlt+8AVVKdcZ84VVpNYp2k/05TLhPtZ9HNgoRgr+H8z9c+BJchlvn4m8VoyTA7DrDMNf49J9jNNuYzbz5I+T3p72PNcVW2YL8wwxi7AzM6SXbsBSHU/J5bn3q7ktmnIYZrapiGHldI2DTlMU9s05DBNbdOQwzS1TUMOC7aRtUyAU9CSJDVgAZYkqQELsCRJDViAJUlqwAIsSVIDFmBJkhqwAEuS1IAFWJKkBizAkiQ1YAGWJKkBC7AkSQ1YgCVJaiBVNV6A5DXgo8mkI2kEa4FTfBWZpCW2pqquHDfI+N+GBB9V1foJxJE0giS7HXvS8kuyexJxnIKWJKkBC7AkSQ1MogD/YgIxJI3OsSe1MZGxN/ZJWJIkaXROQUuS1MCCBTjJkeVIRNLwkmxLsr5f/kOSz7XOSVrpkqzrL62d+/gjSW5eYNuHk2wepb9JXIYkqaGqurV1DtKZrKp+sBRxh56CTucnSV5Lsi/Jxv7xR5Pc3i9vTfJEv7wpyY+XImlpJer3rt9I8mSSvyf5dZKbk7yY5M0kX09yXpInkuxM8nKSb/bbnpvk6SQHkmwFzh2I+3aStXP33pNsTvJwv7wtyZYku/sY1yX5bd/vj5b7byFNsbOTPJ5kf5Ln+7H3ZJJvASS5tR/He5L8LMnvB7a9oh9rh5J8b6GORjkCvgO4Bria7hN4diXZDuwAbgSeAS4FLunXvxF4eoT40mrwFeDbwCZgF/Bd4AbgduAh4HXgz1W1qZ9W3pnkBeAe4D9VdXmSq4C/LaLv/1XV+iTfB34HXAv8C3gryZaq+ue4v5x0Bvgq8J2qujvJb4A7TzQkWQP8HLipqmaSPDVn28uAbwCfBQ4meayqPj5dR6OchHUD8FRVHauqw8BfgOvoC3CSK+hePA4nuQS4HnhphPjSajBTVfuq6jiwH/hTdZci7APWAbcADyZ5BdgGrAG+BNwE/AqgqvYCexfR9zP97T5gf1W9V1VHgUPAFxf9G0lnlpmqeqVf3kM3Lk+4DDhUVTP9/bkF+NmqOlpVs8AHwMXzdTT2e8BV9W6/p74B2A5cCNwFHKmqf48bXzrDHB1YPj5w/zjdeDwG3FlVBwc3SjJM7P9z8k71mtP0PdjvYN+STh4bxxh4u2cR2847rkY5At4BbExydpLP0+2R7+zb/grcT1eAdwCb+1tJo3kOuC99xU3ytf7x7XTT1SS5ErjqFNseBr6Q5KIk5wC3LUO+0mpyEPhyknX9/Y3jBBtlr3cr3bTyq0ABD1TV+33bDuCWqvpHknfojoItwNLofgj8FNib5Cxghq6QPgb8MskB4ADd1NhJqurjJI/Q7Ri/C7yxbFlLq0BV/TfJvcAfk3xIdx7HovlJWJIkDSnJ+VV1pJ+lehR4s6q2LCaWn4QlSdLw7u5PktwPXEB3VvSieAQsSVIDHgFLktSABViSpAYswJIkNWABliSpAQuwJEkNWIAlSWrgEwSYVjCA99i0AAAAAElFTkSuQmCC\n","text/plain":["<Figure size 576x36 with 1 Axes>"]},"metadata":{"needs_background":"light"}}]},{"cell_type":"code","source":[""],"metadata":{"id":"U7Eb25oqgfse"},"execution_count":null,"outputs":[]}]}
+pip install wikipedia
+
+import requests
+import wikipedia
+import nltk
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('maxent_ne_chunker')
+nltk.download('words')
+import re
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+
+# Funktion zum Erhalten der Wikipedia-URL, erlaubt bis zu 2 Tippfehler und wirft bestes Ergebnis aus: 
+
+def getURL(keyword):
+  S = requests.Session()
+  URL = "https://en.wikipedia.org/w/api.php"
+  PARAMS = {
+    "action": "opensearch",
+    "search": keyword,
+    "limit": "1",
+    "format": "json", 
+    'profile': 'fuzzy'
+    }
+  R = S.get(url=URL, params=PARAMS)
+  got = R.json()
+  wikititle = got[3]
+  wt1 = ''.join(str(e) for e in wikititle)
+  #print(wt1)
+  return wt1
+
+wikiurl = getURL('natural language processin')
+wikiurl
+
+# vereinfachte Funktion zum Erhalten des reinen Seitentextes (ohne Rücksichtnahme auf Formeln, Verweise etc. -> werden mit NLTK-Funktion in Folge entfernt)
+
+def getBlankText(keyword):
+  url = getURL(keyword)
+  x = url.split(sep="/", maxsplit=-1)[-1:]
+  page = wikipedia.page(x[-1:])
+  content = page.content.replace('\n', '')
+  print(page)
+  print(content[0:50],'...')
+  return content
+
+page1 = getBlankText('natural langage processing')
+
+# Funktion zum Erhalten der Vokabeldichte, inkl. Ausschließen von Sonderzeichen, Abkürzungen, Füllwörtern etc. via NLTK
+
+def getVD(keyword):
+  url = getURL(keyword)
+  text = getBlankText(keyword)
+  tokens = nltk.word_tokenize(text)
+  tagged = nltk.pos_tag(tokens)
+  nn = []
+  ok = 'NN' 
+  for i in tagged:
+    if ok == i[1]:
+      nn.append(i[0])
+  nn1 = [re.sub('[^a-zA-Z0-9]+', '', _) for _ in nn]
+  nn2 = []
+  for i in nn1:
+    if len(i) > 2:
+      nn2.append(i)
+  VD = len(np.unique(nn2)) / len(nn2)
+  print('vocabulary density: ', VD)
+  return VD
+
+getVD('natural language processing')
+
+# Funktion zum Erhalten der Wörter pro Satz; 
+
+##### TODO: Kontrolle, ob weitere Satzenden definiert werden müssen #####
+
+def getWPS(keyword):
+  url = getURL(keyword)
+  text = getBlankText(keyword)
+  words = text
+  sentences = [[]]
+  ends = set(".?!;")
+  for word in words:
+    if word in ends: sentences.append([])
+    else: sentences[-1].append(word)
+  if sentences[0]:
+    if not sentences[-1]: sentences.pop()
+    wps = sum(len(s) for s in sentences)/len(sentences)
+    print("average words per sentence: ", wps)
+    return wps
+  
+  getWPS('natural language processin')
+  
+  # Funktion zum Plotten von wps und vd 
+
+##### TODO: evtl. noch Radius normalisiert darstellen, im Moment noch durch Kommaverschiebung gelöst #####
+
+def getWordPlot(keyword):
+  VD = getVD(keyword)
+  wps = getWPS(keyword)
+
+  fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(8, 4)) 
+  [axi.set_axis_off() for axi in ax.ravel()]
+
+  cmap = mpl.cm.cool
+  norm = mpl.colors.Normalize(vmin=0, vmax=5)
+
+  ax[0,0] = fig.add_subplot()
+  wpscircle = plt.Circle((0.1, 0.1 ), radius=wps/10, fill=True, color = cmap(norm(wps/10)))
+  ax[0,0].add_patch(wpscircle)
+  label = ax[0,0].annotate('WpS', xy = (0.1, 0.1), fontsize = 15, ha='center')
+  ax[0,0].set_aspect(1)
+  ax[0,0].autoscale_view()
+  ax[0,0].axis('off')
+
+  ax[0,1] = fig.add_subplot()
+  vdcircle = plt.Circle((10.1, 0.1 ), radius=VD*10, fill=True, color = cmap(norm(VD*10)))
+  ax[0,1].add_patch(vdcircle)
+  label = ax[0,1].annotate('VD', xy = (10.1, 0.1), fontsize = 15, ha='center')
+  ax[0,1].set_aspect(1)
+  ax[0,1].autoscale_view()
+  ax[0,1].axis('off')
+
+  fig, ax = plt.subplots(figsize=(8, 0.5))
+  fig.subplots_adjust(bottom=0.5)
+
+  cbar = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap),cax=ax, orientation='horizontal')
+
+  cbar.set_ticks(np.arange(0, 10, 2.5))
+  cbar.set_ticklabels(['low', 'medium', 'high'])
+
+  plt.show()
+  
+  getWordPlot('natural language processing')
