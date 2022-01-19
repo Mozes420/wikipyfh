@@ -26,7 +26,7 @@ def getURL(keyword):
   #print(wt1)
   return wt1
 
-wikiurl = getURL('NLP')
+#wikiurl = getURL('NLP')
 
 # vereinfachte Funktion zum Erhalten des reinen Seitentextes (ohne Rücksichtnahme auf Formeln, Verweise etc. -> werden mit NLTK-Funktion in Folge entfernt)
 
@@ -34,18 +34,19 @@ def getBlankText(keyword):
   url = getURL(keyword)
   x = url.split(sep="/", maxsplit=-1)[-1:]
   page = wikipedia.page(x[-1:])
-  content = page.content.replace('\n', '')
+  textFull = page.content
+  content = page.content.replace('\n', '') 
   print(page)
-  print(content[0:50],'...')
-  return content
+  #print(content[0:50],'...')
+  return content, textFull
 
-page1 = getBlankText('natural langage processing')
+#page1 = getBlankText('nlp')
 
-stopwords = set(STOPWORDS)
-stopwords.update(["e.g"])
+#stopwords = set(STOPWORDS)
+#stopwords.update(["e.g"])
 
-wordcloud = WordCloud(stopwords=stopwords, max_font_size=50, max_words=100, background_color="white").generate(page1)
-plt.figure()
-plt.imshow(wordcloud, interpolation="bilinear")
-plt.axis("off")
-plt.show()
+# wordcloud = WordCloud(stopwords=stopwords, max_font_size=50, max_words=100, background_color="white").generate(page1)
+# plt.figure()
+# plt.imshow(wordcloud, interpolation="bilinear")
+# plt.axis("off")
+# plt.show()

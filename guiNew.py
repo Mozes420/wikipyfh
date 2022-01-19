@@ -1,6 +1,7 @@
+from webbrowser import get
 import PyQt5.QtWidgets as QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLineEdit, QDesktopWidget, QSpacerItem, QSizePolicy, QGridLayout, QGroupBox
-import PyQt5.QtCore 
+from PyQt5.QtWidgets import QApplication, QLabel, QPushButton, QLineEdit, QDesktopWidget, QGridLayout, QGroupBox
+import PyQt5.QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
 
@@ -27,6 +28,10 @@ import pandas as pd
 import datetime
 import re
 import urllib
+
+from vis1 import getBlankText, getURL
+import wikipedia
+from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
 
 class GroupBox(QtWidgets.QWidget):
@@ -63,21 +68,28 @@ class GroupBox(QtWidgets.QWidget):
         self.button.setMaximumHeight(100)
         self.button.setMaximumWidth(400)
 
-        # Einfügen von Layout Funktionen
+        # Einfügen von befüllten Widgets
         #############################################
-        self.canvas = FigureCanvas(Figure())
-        self.canvas.setParent(self)
+        self.canvasTrend = FigureCanvas(Figure())
+        self.canvasTrend.setParent(self)
 
-        
+        self.canvasCloud = FigureCanvas(Figure())
+        self.canvasCloud.setMaximumHeight(500)
+        self.canvasCloud.setParent(self)
+
+        # self.blankText = QLabel(self) ################ WORK IN PROGRESS
+        # self.blankText.setAlignment(PyQt5.QtCore.Qt.AlignLeft | PyQt5.QtCore.Qt.AlignTop)
+        # self.blankText.setWordWrap(True)
+        # self.blankText.setGeometry(100, 100, 200, 80)
+        # self.blankText.setParent(self)
 
         self.grid = QGridLayout()
         self.groupbox.setLayout(self.grid)
         self.grid.addWidget(self.input, 1,1, PyQt5.QtCore.Qt.AlignCenter)
         self.grid.addWidget(self.button, 1,2, PyQt5.QtCore.Qt.AlignCenter)
-        self.grid.addWidget(self.canvas, 2,1, PyQt5.QtCore.Qt.AlignCenter)
-
-        # Spacer Items
-
+        self.grid.addWidget(self.canvasTrend, 2,1, PyQt5.QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.canvasCloud, 2,2, PyQt5.QtCore.Qt.AlignCenter)
+        #self.grid.addWidget(self.blankText, 3,2, PyQt5.QtCore.Qt.AlignCenter) ####################### WIP
 
 
     # Funktion muss in die Klasse
@@ -88,23 +100,46 @@ class GroupBox(QtWidgets.QWidget):
         keywords = pytrends.suggestions(keyword=input[0])
         df = pd.DataFrame(keywords)
         df.drop(columns= 'mid')
-        dfg = pytrends.interest_over_time()
-        #fig = plt.figure()
-        self.canvas = FigureCanvas(Figure())
-        self.canvas.axes = self.canvas.figure.add_subplot(111)
-        self.canvas.axes.clear()
-        self.canvas.axes.set_title('Relative search term frequency')
-        self.canvas.axes.plot(dfg)
-        self.canvas.axes.legend((""),loc='lower left')
-        self.canvas.draw()
-        self.grid.addWidget(self.canvas, 2, 1, PyQt5.QtCore.Qt.AlignCenter)
+        dfg = pytrends.interest_over_time().drop(labels=['isPartial'],axis='columns')
+        self.canvasTrend = FigureCanvas(Figure())
+        self.canvasTrend.axes = self.canvasTrend.figure.add_subplot(111)
+        self.canvasTrend.axes.clear()
+        self.canvasTrend.axes.set_title('Relative Search Term Frequency')
+        self.canvasTrend.axes.plot(dfg)
+        self.canvasTrend.axes.legend((dfg[0:0]),loc='upper right')
+        self.canvasTrend.draw()
+        self.canvasTrend.axes.set_xlabel('Time')
+        self.canvasTrend.axes.set_ylabel('Frequency')
+        self.canvasTrend.axes.set_xticklabels(labels=dfg.index[:,], rotation=45)
+        self.grid.addWidget(self.canvasTrend, 2, 1, PyQt5.QtCore.Qt.AlignCenter)
     
+
+    def drawWordCloud(self, keyword):
+        text = getBlankText(keyword)[0]
+        stopwords = set(STOPWORDS)
+        stopwords.update(["e.g"])
+        wordcloud = WordCloud(stopwords=stopwords, max_font_size=50, max_words=100, background_color="white").generate(text)
+        self.canvasCloud = FigureCanvas(Figure())
+        self.axes = self.canvasCloud.figure.add_subplot()
+        self.axes.axis('off')
+        self.axes.imshow(wordcloud)
+        self.grid.addWidget(self.canvasCloud, 2,2, PyQt5.QtCore.Qt.AlignCenter)
+
+
+    # def writeTextWiki(self, keyword): ########################### WIP 
+    #      text = getBlankText(keyword)[1]
+    #      self.blankText.setText(text)
+    #      self.grid.addWidget(self.blankText, 3,2, PyQt5.QtCore.Qt.AlignCenter)
 
 
     def readInput(self):  # this function can be used to read user input and call a function based on the input                                                                                   
         print('' + self.input.text())
         text = [self.input.text()]
         self.gtrend(text)
+        self.drawWordCloud(self.input.text())
+        #self.writeTextWiki(self.input.text()) ################# WIP
+
+
 
 
 if __name__ == "__main__":
