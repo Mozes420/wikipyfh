@@ -77,12 +77,15 @@ getVD('natural language processing')
 def getWPS(keyword):
   url = getURL(keyword)
   text = getBlankText(keyword)
-  words = text
+  tokens = nltk.word_tokenize(text)
+  words = tokens
   sentences = [[]]
-  ends = set(".?!;")
+  ends = set(".?!;:")
   for word in words:
-    if word in ends: sentences.append([])
-    else: sentences[-1].append(word)
+    if word in ends: 
+      sentences.append([])
+    else: 
+      sentences[-1].append(word)
   if sentences[0]:
     if not sentences[-1]: sentences.pop()
     wps = sum(len(s) for s in sentences)/len(sentences)
