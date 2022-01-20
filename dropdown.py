@@ -18,16 +18,32 @@ while True:
         "language" : "en",
         "format" : "json",
         "search" : query, 
-        "srlimit":10
+        "limit":10
         }
         
         try:
+            OPTIONS = []
+            VALUES = []
+
             data = requests.get(url,params=params)
             par = len(data.json()["search"])
+
             for i in range(par):
-                print(data.json()["search"][i]["description"])
-                OPTIONS.append(data.json()["search"][i]["description"])
-                VALUES.append(data.json()["search"][i])
+                djs = data.json()["search"][i]
+                lendjs = len(djs)
+                #print(djs)
+                for j in djs:
+                    #print(j)
+                    if j == 'description':
+                      if data.json()["search"][i]["description"] == 'Wikimedia disambiguation page':
+                        continue
+                      OPTIONS.append(data.json()["search"][i]["description"])
+                      VALUES.append(data.json()["search"][i])
+                    elif j == 'label':
+                      OPTIONS.append(data.json()["search"][i]["label"])
+                      VALUES.append(data.json()["search"][i])
+                    else: 
+                      continue
                 
         except:
             print("Invalid Input try again !!!")
