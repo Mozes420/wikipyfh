@@ -20,4 +20,4 @@ def gtrend(input):
     #plt.plot(dfg, 'k')
     return plt.show()
 
-gtrend(['NLP'])
+#gtrend(['NLP'])

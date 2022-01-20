@@ -1,9 +1,10 @@
 from webbrowser import get
 import PyQt5.QtWidgets as QtWidgets
-from PyQt5.QtWidgets import QApplication, QLabel, QPushButton, QLineEdit, QDesktopWidget, QGridLayout, QGroupBox
+from PyQt5.QtWidgets import QApplication, QLabel, QPushButton, QLineEdit, QDesktopWidget, QGridLayout, QGroupBox, QTextEdit, QComboBox
 import PyQt5.QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
+from dropdownList import getDropdownList
 
 import sys
 import random
@@ -28,6 +29,7 @@ import pandas as pd
 import datetime
 import re
 import urllib
+from gtrends import gtrend
 
 from vis1 import getBlankText, getURL
 import wikipedia
@@ -42,13 +44,15 @@ class GroupBox(QtWidgets.QWidget):
 
         # Anfangsfenster setzen, Größe auswählen und zentrieren
 
+        self.checker = False
+
         self.setWindowTitle("WikiPy")
         screen = QDesktopWidget().screenGeometry()
-        self.resize(int(screen.width()), int(screen.height()))
+        self.resize(int(screen.width()/2), int(screen.height()/2))
         form = self.geometry()
         x_move_step = (screen.width() - form.width())
         y_move_step = (screen.height() - form.height())
-        self.move(int(x_move_step), int(y_move_step))
+        self.move(int(x_move_step/2), int(y_move_step/2))
     
         self.layout = QGridLayout(self)
         self.groupbox = QGroupBox("Start you Knowledge!", checkable=False)
@@ -64,32 +68,57 @@ class GroupBox(QtWidgets.QWidget):
 
         self.button = QPushButton("Go!")
         self.button.setParent(self)
-        self.button.clicked.connect(self.readInput)
-        self.button.setMaximumHeight(100)
-        self.button.setMaximumWidth(400)
+        #self.button.clicked.connect(self.readInput)
+        self.button.clicked.connect(self.setDropdownItems)
+        self.button.setMaximumHeight(50)
+        self.button.setMaximumWidth(200)
+
+
+        
+        self.comboBox = QComboBox(self)
+        self.comboBox.setEditable(True)
+        self.comboBox.setMinimumWidth(300)
+        #self.comboBox.currentIndexChanged.connect(self.setDropdownItems)
+        #self.comboBox.currentIndexChanged.connect(self.callFunctions("test"))
+
+
+        self.button2 = QPushButton("Go!")
+        self.button2.setParent(self)
+        #self.button2.clicked.connect(self.readInput)
+        self.button2.setMaximumHeight(50)
+        self.button2.setMaximumWidth(200)
+        self.button2.clicked.connect(self.call)
+            
+
+
+        
 
         # Einfügen von befüllten Widgets
         #############################################
         self.canvasTrend = FigureCanvas(Figure())
         self.canvasTrend.setParent(self)
+        self.canvasTrend.setMaximumWidth(400)
+        self.canvasTrend.setMaximumHeight(300)
 
         self.canvasCloud = FigureCanvas(Figure())
-        self.canvasCloud.setMaximumHeight(500)
         self.canvasCloud.setParent(self)
+        self.canvasCloud.setMaximumWidth(400)
+        self.canvasCloud.setMaximumHeight(300)
 
-        self.blankText = QLabel(self) ################ WORK IN PROGRESS
-        self.blankText.setAlignment(PyQt5.QtCore.Qt.AlignLeft | PyQt5.QtCore.Qt.AlignTop)
-        self.blankText.setWordWrap(True)
-        self.blankText.setGeometry(100, 100, 200, 80)
+        self.blankText = QTextEdit(self) ################ WORK IN PROGRESS
+        self.blankText.setMinimumWidth(300)
+        self.blankText.setMinimumHeight(400)
         self.blankText.setParent(self)
 
         self.grid = QGridLayout()
         self.groupbox.setLayout(self.grid)
-        self.grid.addWidget(self.input, 0,0,1,3, PyQt5.QtCore.Qt.AlignCenter)
+        #self.grid.addWidget(self.input, 0,0,1,3, PyQt5.QtCore.Qt.AlignCenter)
         self.grid.addWidget(self.button, 0,1,1,2, PyQt5.QtCore.Qt.AlignRight)
+        self.grid.addWidget(self.button2, 0,1,1,2, PyQt5.QtCore.Qt.AlignCenter)
         self.grid.addWidget(self.canvasTrend, 1,0, PyQt5.QtCore.Qt.AlignCenter)
         self.grid.addWidget(self.canvasCloud, 1,1, PyQt5.QtCore.Qt.AlignCenter)
-        self.grid.addWidget(self.blankText, 1,2, PyQt5.QtCore.Qt.AlignLeft) ####################### WIP
+        self.grid.addWidget(self.blankText, 1,2, PyQt5.QtCore.Qt.AlignCenter) ####################### WIP
+        self.grid.addWidget(self.comboBox, 0,0,1,3, PyQt5.QtCore.Qt.AlignCenter)
 
 
     # Funktion muss in die Klasse
@@ -111,6 +140,8 @@ class GroupBox(QtWidgets.QWidget):
         self.canvasTrend.axes.set_xlabel('Time')
         self.canvasTrend.axes.set_ylabel('Frequency')
         self.canvasTrend.axes.set_xticklabels(labels=dfg.index[:,], rotation=45)
+        self.canvasTrend.setMaximumWidth(400)
+        self.canvasTrend.setMaximumHeight(300)
         self.grid.addWidget(self.canvasTrend, 1,0, PyQt5.QtCore.Qt.AlignCenter)
     
 
@@ -123,6 +154,8 @@ class GroupBox(QtWidgets.QWidget):
         self.axes = self.canvasCloud.figure.add_subplot()
         self.axes.axis('off')
         self.axes.imshow(wordcloud)
+        self.canvasCloud.setMaximumWidth(400)
+        self.canvasCloud.setMaximumHeight(300)
         self.grid.addWidget(self.canvasCloud, 1,1, PyQt5.QtCore.Qt.AlignCenter)
 
 
@@ -138,6 +171,22 @@ class GroupBox(QtWidgets.QWidget):
         self.gtrend(text)
         self.drawWordCloud(self.input.text())
         self.writeTextWiki(self.input.text()) ################# WIP
+
+    def setDropdownItems(self):
+        list = getDropdownList(self.comboBox.currentText())
+        self.comboBox.addItems(list)
+        self.checker = True
+
+    def callFunctions(self):
+        self.gtrend([self.comboBox.currentText()])
+        self.drawWordCloud(self.comboBox.currentText())
+        self.writeTextWiki(self.comboBox.currentText())
+
+    def call(self):
+        if(self.checker):
+            self.button2.clicked.connect(self.callFunctions)
+            print("called call")
+
 
 
 
