@@ -66,32 +66,24 @@ class GroupBox(QtWidgets.QWidget):
 
         # Einfügen von Button der Anfragen mit Input des Line Edit startet
 
-        self.button = QPushButton("Go!")
+        self.button = QPushButton("Get Search Results")
         self.button.setParent(self)
         #self.button.clicked.connect(self.readInput)
         self.button.clicked.connect(self.setDropdownItems)
-        self.button.setMaximumHeight(50)
+        self.button.setMaximumHeight(25)
         self.button.setMaximumWidth(200)
 
-
-        
         self.comboBox = QComboBox(self)
         self.comboBox.setEditable(True)
         self.comboBox.setMinimumWidth(300)
-        #self.comboBox.currentIndexChanged.connect(self.setDropdownItems)
-        #self.comboBox.currentIndexChanged.connect(self.callFunctions("test"))
-
 
         self.button2 = QPushButton("Go!")
         self.button2.setParent(self)
         #self.button2.clicked.connect(self.readInput)
-        self.button2.setMaximumHeight(50)
+        self.button2.setMaximumHeight(25)
         self.button2.setMaximumWidth(200)
         self.button2.clicked.connect(self.call)
             
-
-
-        
 
         # Einfügen von befüllten Widgets
         #############################################
@@ -113,12 +105,12 @@ class GroupBox(QtWidgets.QWidget):
         self.grid = QGridLayout()
         self.groupbox.setLayout(self.grid)
         #self.grid.addWidget(self.input, 0,0,1,3, PyQt5.QtCore.Qt.AlignCenter)
-        self.grid.addWidget(self.button, 0,1,1,2, PyQt5.QtCore.Qt.AlignRight)
-        self.grid.addWidget(self.button2, 0,1,1,2, PyQt5.QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.button, 0,0,1,2, PyQt5.QtCore.Qt.AlignRight)
+        self.grid.addWidget(self.button2, 0,1,1,2, PyQt5.QtCore.Qt.AlignRight)
         self.grid.addWidget(self.canvasTrend, 1,0, PyQt5.QtCore.Qt.AlignCenter)
         self.grid.addWidget(self.canvasCloud, 1,1, PyQt5.QtCore.Qt.AlignCenter)
         self.grid.addWidget(self.blankText, 1,2, PyQt5.QtCore.Qt.AlignCenter) ####################### WIP
-        self.grid.addWidget(self.comboBox, 0,0,1,3, PyQt5.QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.comboBox, 0,0,1,2, PyQt5.QtCore.Qt.AlignCenter)
 
 
     # Funktion muss in die Klasse
@@ -173,9 +165,13 @@ class GroupBox(QtWidgets.QWidget):
         self.writeTextWiki(self.input.text()) ################# WIP
 
     def setDropdownItems(self):
+        print("searching results for: " + self.comboBox.currentText())
         list = getDropdownList(self.comboBox.currentText())
         self.comboBox.addItems(list)
+        self.button2.clicked.connect(self.callFunctions)
         self.checker = True
+        print("done")
+        
 
     def callFunctions(self):
         self.gtrend([self.comboBox.currentText()])
@@ -185,7 +181,9 @@ class GroupBox(QtWidgets.QWidget):
     def call(self):
         if(self.checker):
             self.button2.clicked.connect(self.callFunctions)
-            print("called call")
+            print("creating...")
+        else: print("You need to get search results first!")
+        
 
 
 
