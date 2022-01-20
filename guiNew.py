@@ -44,10 +44,10 @@ class GroupBox(QtWidgets.QWidget):
 
         self.setWindowTitle("WikiPy")
         screen = QDesktopWidget().screenGeometry()
-        self.resize(int(screen.width() / 2), int(screen.height() / 2))
+        self.resize(int(screen.width()), int(screen.height()))
         form = self.geometry()
-        x_move_step = (screen.width() - form.width()) / 2
-        y_move_step = (screen.height() - form.height()) / 2
+        x_move_step = (screen.width() - form.width())
+        y_move_step = (screen.height() - form.height())
         self.move(int(x_move_step), int(y_move_step))
     
         self.layout = QGridLayout(self)
@@ -56,13 +56,13 @@ class GroupBox(QtWidgets.QWidget):
 
         # Einfügen von Text Input Feld
 
-        self.input = QLineEdit("Suchanfrage eingeben")
+        self.input = QLineEdit("Type your search ...")
         self.input.setMaximumHeight(100)
-        self.input.setMaximumWidth(200)
+        self.input.setMaximumWidth(400)
 
         # Einfügen von Button der Anfragen mit Input des Line Edit startet
 
-        self.button = QPushButton("Suchen!")
+        self.button = QPushButton("Go!")
         self.button.setParent(self)
         self.button.clicked.connect(self.readInput)
         self.button.setMaximumHeight(100)
@@ -77,19 +77,19 @@ class GroupBox(QtWidgets.QWidget):
         self.canvasCloud.setMaximumHeight(500)
         self.canvasCloud.setParent(self)
 
-        # self.blankText = QLabel(self) ################ WORK IN PROGRESS
-        # self.blankText.setAlignment(PyQt5.QtCore.Qt.AlignLeft | PyQt5.QtCore.Qt.AlignTop)
-        # self.blankText.setWordWrap(True)
-        # self.blankText.setGeometry(100, 100, 200, 80)
-        # self.blankText.setParent(self)
+        self.blankText = QLabel(self) ################ WORK IN PROGRESS
+        self.blankText.setAlignment(PyQt5.QtCore.Qt.AlignLeft | PyQt5.QtCore.Qt.AlignTop)
+        self.blankText.setWordWrap(True)
+        self.blankText.setGeometry(100, 100, 200, 80)
+        self.blankText.setParent(self)
 
         self.grid = QGridLayout()
         self.groupbox.setLayout(self.grid)
-        self.grid.addWidget(self.input, 1,1, PyQt5.QtCore.Qt.AlignCenter)
-        self.grid.addWidget(self.button, 1,2, PyQt5.QtCore.Qt.AlignCenter)
-        self.grid.addWidget(self.canvasTrend, 2,1, PyQt5.QtCore.Qt.AlignCenter)
-        self.grid.addWidget(self.canvasCloud, 2,2, PyQt5.QtCore.Qt.AlignCenter)
-        #self.grid.addWidget(self.blankText, 3,2, PyQt5.QtCore.Qt.AlignCenter) ####################### WIP
+        self.grid.addWidget(self.input, 0,0,1,3, PyQt5.QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.button, 0,1,1,2, PyQt5.QtCore.Qt.AlignRight)
+        self.grid.addWidget(self.canvasTrend, 1,0, PyQt5.QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.canvasCloud, 1,1, PyQt5.QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.blankText, 1,2, PyQt5.QtCore.Qt.AlignLeft) ####################### WIP
 
 
     # Funktion muss in die Klasse
@@ -111,7 +111,7 @@ class GroupBox(QtWidgets.QWidget):
         self.canvasTrend.axes.set_xlabel('Time')
         self.canvasTrend.axes.set_ylabel('Frequency')
         self.canvasTrend.axes.set_xticklabels(labels=dfg.index[:,], rotation=45)
-        self.grid.addWidget(self.canvasTrend, 2, 1, PyQt5.QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.canvasTrend, 1,0, PyQt5.QtCore.Qt.AlignCenter)
     
 
     def drawWordCloud(self, keyword):
@@ -123,13 +123,13 @@ class GroupBox(QtWidgets.QWidget):
         self.axes = self.canvasCloud.figure.add_subplot()
         self.axes.axis('off')
         self.axes.imshow(wordcloud)
-        self.grid.addWidget(self.canvasCloud, 2,2, PyQt5.QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.canvasCloud, 1,1, PyQt5.QtCore.Qt.AlignCenter)
 
 
-    # def writeTextWiki(self, keyword): ########################### WIP 
-    #      text = getBlankText(keyword)[1]
-    #      self.blankText.setText(text)
-    #      self.grid.addWidget(self.blankText, 3,2, PyQt5.QtCore.Qt.AlignCenter)
+    def writeTextWiki(self, keyword): ########################### WIP 
+         text = getBlankText(keyword)[0]
+         self.blankText.setText(text)
+         self.grid.addWidget(self.blankText, 1,2, PyQt5.QtCore.Qt.AlignCenter)
 
 
     def readInput(self):  # this function can be used to read user input and call a function based on the input                                                                                   
@@ -137,7 +137,7 @@ class GroupBox(QtWidgets.QWidget):
         text = [self.input.text()]
         self.gtrend(text)
         self.drawWordCloud(self.input.text())
-        #self.writeTextWiki(self.input.text()) ################# WIP
+        self.writeTextWiki(self.input.text()) ################# WIP
 
 
 
