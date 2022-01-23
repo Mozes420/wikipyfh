@@ -8,6 +8,7 @@ import urllib
 import shutil
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+import numpy as np
 
 def getSoup(wikipage):
 	#get page to soup
@@ -233,7 +234,22 @@ def getRevisions(wikititle):
 	return df
 	
 def getRevsPerDay(df):
-	revsperday = df.groupby(df['timestamp'].apply(lambda x: x.strftime('%Y-%m-%d'))).count()['revid']
+	revsperday = df.groupby(df['timestamp'].astype(datetime.date).apply(lambda x: x.strftime('%Y-%m-%d'))).count()['revid']
 	revsperday = revsperday.reset_index()		
 	revsperday = revsperday.rename(columns={'revid':'count'})
 	return revsperday
+
+
+def getRevsPerUser(wikititle):
+	rev_df = getRevisions(wikititle)
+	rev_df['timestamp'] = rev_df['timestamp'].apply(lambda x: x.strftime('%Y-%m-%d'))
+	rev_dates = np.sort(rev_df['timestamp'].unique())
+	result_df = pd.DataFrame(columns=['Date', 'RevsPerUser'])
+	input = {'Date': None, 'RevsPerUser':None}
+	for date in rev_dates:
+		input['Date'] = date
+		window_df = rev_df.loc[rev_df['timestamp']<=date]
+		input['RevsPerUser'] = window_df['revid'].count()/len(window_df['user'].unique())
+			
+		result_df = result_df.append(input, ignore_index=True)
+	return result_df
