@@ -35,7 +35,8 @@ def getBlankText(keyword):
   x = url.split(sep="/", maxsplit=-1)[-1:]
   page = wikipedia.page(x[-1:])
   textFull = page.content
-  content = page.content.replace('\n', '') 
+  content = page.content.replace('\n', '')
+  print('vis1')
   print(page)
   #print(content[0:50],'...')
   return content, textFull

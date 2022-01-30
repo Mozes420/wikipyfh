@@ -1,10 +1,22 @@
 from webbrowser import get
 import PyQt5.QtWidgets as QtWidgets
-from PyQt5.QtWidgets import QApplication, QLabel, QPushButton, QLineEdit, QDesktopWidget, QGridLayout, QGroupBox, QTextEdit, QComboBox
+from PyQt5.QtWidgets import (
+    QDialog,
+    QApplication,
+    QLabel,
+    QPushButton,
+    QLineEdit,
+    QDesktopWidget,
+    QGridLayout,
+    QGroupBox,
+    QTextEdit,
+    QComboBox
+)
 import PyQt5.QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
 from dropdownList import getDropdownList
+from PyQt5 import uic
 
 import sys
 import random
@@ -12,6 +24,7 @@ from random import choice
 from crawlerlib import getSoup
 #from gtrends import gtrend
 import numpy as np
+
 # for gtrends
 import pandas as pd
 from pytrends.request import TrendReq
@@ -35,6 +48,63 @@ import wikipedia
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
 
+# Einstiegsbildschirm
+
+class WelcomeScreen(QtWidgets.QDialog):
+    def __init__(self):
+        super(WelcomeScreen, self).__init__()
+        uic.loadUi('welcomeScreen.ui', self)
+
+        self.checkerWelcome = False
+
+        self.testBox = GroupBox()
+
+        #Festlegen von Params 
+        self.setWindowTitle("WikiPy")
+        self.resize(800,600)
+
+        #Finden der UI-Widgets
+        self.inputQuery = self.findChild(QComboBox, 'comboBox')
+        self.buttonOne = self.findChild(QPushButton, 'pushButton')
+        self.buttonOne.clicked.connect(self.setDropdownItems)
+        self.buttonTwo = self.findChild(QPushButton, 'pushButton_2')
+        self.buttonTwo.clicked.connect(self.call)
+
+
+    def setDropdownItems(self):
+        print("searching results for: " + self.inputQuery.currentText())
+        list = getDropdownList(self.inputQuery.currentText())
+        self.inputQuery.addItems(list)
+        self.checkerWelcome = True
+        print("done")
+        
+
+    def setIndexToOne(self):
+        print('set index to one function call')
+        WikiPy.setCurrentIndex(1)
+        self.callFunctions()
+        
+
+    def callFunctions(self):
+        #WikiPy.setCurrentIndex(0)
+        print(self.inputQuery.currentText())
+        inp = self.inputQuery.currentText()
+        text = getBlankText(inp)[0]
+        #WikiPy.setCurrentIndex(1)
+        self.testBox.callFunctions(text, inp)
+
+
+
+    def call(self):
+        if(self.checkerWelcome):
+            #self.buttonTwo.clicked.connect(self.setIndexToOne)
+            print("creating...")
+            self.setIndexToOne()
+        else: print("You need to get search results first!")
+
+
+
+# Dashboard Bildschirm
 
 class GroupBox(QtWidgets.QWidget):
 
@@ -112,8 +182,25 @@ class GroupBox(QtWidgets.QWidget):
         self.grid.addWidget(self.blankText, 1,2, PyQt5.QtCore.Qt.AlignCenter) ####################### WIP
         self.grid.addWidget(self.comboBox, 0,0,1,2, PyQt5.QtCore.Qt.AlignCenter)
 
+    # Funktion aufrufen Welcome Screen
+
+    def start(self):
+        welcomeScreen = WelcomeScreen()
+        if welcomeScreen.exec_():
+            self.show()
+        else:
+            welcomeScreen.exec_()
 
     # Funktion muss in die Klasse
+
+    def setDropdownItems(self):
+        print("searching results for: " + self.comboBox.currentText())
+        list = getDropdownList(self.comboBox.currentText())
+        self.comboBox.addItems(list)
+        self.button2.clicked.connect(self.callFunctions)
+        self.checker = True
+        print("done")
+
 
     def gtrend(self, input):
         pytrends = TrendReq(hl='en-US', tz=360)
@@ -137,8 +224,7 @@ class GroupBox(QtWidgets.QWidget):
         self.grid.addWidget(self.canvasTrend, 1,0, PyQt5.QtCore.Qt.AlignCenter)
     
 
-    def drawWordCloud(self, keyword):
-        text = getBlankText(keyword)[0]
+    def drawWordCloud(self, text):
         stopwords = set(STOPWORDS)
         stopwords.update(["e.g"])
         wordcloud = WordCloud(stopwords=stopwords, max_font_size=50, max_words=100, background_color="white").generate(text)
@@ -151,32 +237,16 @@ class GroupBox(QtWidgets.QWidget):
         self.grid.addWidget(self.canvasCloud, 1,1, PyQt5.QtCore.Qt.AlignCenter)
 
 
-    def writeTextWiki(self, keyword): ########################### WIP 
-         text = getBlankText(keyword)[0]
+    def writeTextWiki(self, text): ########################### WIP 
          self.blankText.setText(text)
+         print('writetextwiki')
          self.grid.addWidget(self.blankText, 1,2, PyQt5.QtCore.Qt.AlignCenter)
-
-
-    def readInput(self):  # this function can be used to read user input and call a function based on the input                                                                                   
-        print('' + self.input.text())
-        text = [self.input.text()]
-        self.gtrend(text)
-        self.drawWordCloud(self.input.text())
-        self.writeTextWiki(self.input.text()) ################# WIP
-
-    def setDropdownItems(self):
-        print("searching results for: " + self.comboBox.currentText())
-        list = getDropdownList(self.comboBox.currentText())
-        self.comboBox.addItems(list)
-        self.button2.clicked.connect(self.callFunctions)
-        self.checker = True
-        print("done")
         
 
-    def callFunctions(self):
-        self.gtrend([self.comboBox.currentText()])
-        self.drawWordCloud(self.comboBox.currentText())
-        self.writeTextWiki(self.comboBox.currentText())
+    def callFunctions(self, text, inp):
+        self.gtrend([inp])
+        self.drawWordCloud(text)
+        self.writeTextWiki(text)
 
     def call(self):
         if(self.checker):
@@ -190,6 +260,12 @@ class GroupBox(QtWidgets.QWidget):
 if __name__ == "__main__":
     import sys
     app = QApplication(sys.argv)
-    WikiPy = GroupBox()
-    WikiPy.show()
+    WikiPy = QtWidgets.QStackedWidget()
+    welcomescreen = WelcomeScreen()
+    #groupbox = GroupBox()
+    WikiPy.addWidget(welcomescreen)
+    WikiPy.addWidget(welcomescreen.testBox)
+    print(WikiPy.currentIndex())
+    WikiPy.show()  
+
     sys.exit(app.exec_())
