@@ -51,10 +51,15 @@ def freqWords(keyword):
     stopwords = set(STOPWORDS)
     stopwords.update(["e.g", "e", "g", "The"])
     text_sw = [word for word in text_tokenized if not word in stopwords]
-    Count_words = Counter(text_sw)
+    words = []
+    for i in text_sw:
+      if len(i) > 2:
+        words.append(i)
+    words_final = [x for x in words if not (x.isdigit() or x[0] == '-' and x[1:].isdigit())]
+    Count_words = Counter(words_final)
     most_frequent = Count_words.most_common(10)
-    wordcloud = WordCloud(stopwords=stopwords, max_font_size=50, max_words=100, background_color="white").generate(text)
-    print('most frequent ' + most_frequent)
+    wordcloud = WordCloud(stopwords=stopwords, max_font_size=50, max_words=100, background_color="white").generate(text)"""
+    print(most_frequent)
     
 
 freqWords("natural language processing")
