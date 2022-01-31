@@ -253,3 +253,13 @@ def getRevsPerUser(wikititle):
 			
 		result_df = result_df.append(input, ignore_index=True)
 	return result_df
+
+
+def getrevplot(wikititle):
+	revplot = getRevisions(wikititle)
+	revplot0 = revplot.drop(columns = ['revid', 'parentid', 'minor', 'comment', 'anon', 'commenthidden'])
+	revplot1 = revplot0[revplot.timestamp.between('2015-01-01', '2021-12-31', inclusive=False)]
+	revplot2 = revplot1.set_index('timestamp')
+	revplot3 = revplot2.groupby(pd.Grouper(freq='M')).count()
+	plt.figure()
+	plt.plot(revplot3, 'k')

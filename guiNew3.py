@@ -266,6 +266,6 @@ if __name__ == "__main__":
     WikiPy.addWidget(welcomescreen)
     WikiPy.addWidget(welcomescreen.testBox)
     print(WikiPy.currentIndex())
-    WikiPy.show()  
+    WikiPy.show()
 
     sys.exit(app.exec_())

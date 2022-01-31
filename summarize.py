@@ -1,4 +1,4 @@
-'''
+
 def getBlankText(keyword):
   url = getURL(keyword)
   x = url.split(sep="/", maxsplit=-1)[-1:]
@@ -7,15 +7,12 @@ def getBlankText(keyword):
   print(page)
   print(content[0:50],'...')
   return content
-'''
 
-'''
-pip install pysummarization
 
 from pysummarization.nlpbase.auto_abstractor import AutoAbstractor
 from pysummarization.tokenizabledoc.simple_tokenizer import SimpleTokenizer
 from pysummarization.abstractabledoc.top_n_rank_abstractor import TopNRankAbstractor
-'''
+
 
 def getSummary(keyword):
   Summary = []

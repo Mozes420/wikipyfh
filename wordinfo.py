@@ -1,4 +1,4 @@
-pip install wikipedia
+#pip install wikipedia
 
 import requests
 import wikipedia

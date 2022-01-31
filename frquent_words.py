@@ -53,8 +53,8 @@ def freqWords(keyword):
     text_sw = [word for word in text_tokenized if not word in stopwords]
     Count_words = Counter(text_sw)
     most_frequent = Count_words.most_common(10)
-    # wordcloud = WordCloud(stopwords=stopwords, max_font_size=50, max_words=100, background_color="white").generate(text)"""
-    print(most_frequent)
+    wordcloud = WordCloud(stopwords=stopwords, max_font_size=50, max_words=100, background_color="white").generate(text)
+    print('most frequent ' + most_frequent)
     
 
 freqWords("natural language processing")

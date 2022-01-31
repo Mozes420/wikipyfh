@@ -9,9 +9,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>698</width>
-    <height>493</height>
+    <width>1185</width>
+    <height>807</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1080</width>
+    <height>720</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>WikiPy</string>
@@ -20,13 +32,28 @@
    <bool>true</bool>
   </property>
   <widget class="QWidget" name="widget" native="true">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>10</y>
-     <width>661</width>
-     <height>481</height>
+     <x>0</x>
+     <y>0</y>
+     <width>1251</width>
+     <height>831</height>
     </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>1231</width>
+     <height>781</height>
+    </size>
    </property>
    <property name="styleSheet">
     <string notr="true">background-color: qlineargradient(spread:repeat, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 245, 228, 255), stop:1 rgba(255, 255, 255, 255));</string>
@@ -34,11 +61,17 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>510</x>
-      <y>280</y>
-      <width>51</width>
-      <height>31</height>
+      <x>690</x>
+      <y>420</y>
+      <width>91</width>
+      <height>61</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Lucida Fax</family>
+      <pointsize>12</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>Results</string>
@@ -47,15 +80,30 @@
    <widget class="QTextBrowser" name="textBrowser">
     <property name="geometry">
      <rect>
-      <x>90</x>
-      <y>170</y>
+      <x>290</x>
+      <y>230</y>
       <width>521</width>
       <height>91</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Lucida Bright</family>
+      <pointsize>12</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
     <property name="styleSheet">
      <string notr="true">background-color: rgb(255, 255, 255);
 font: 12pt &quot;Lucida Bright&quot;;</string>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::WinPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
     </property>
     <property name="html">
      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -68,11 +116,17 @@ p, li { white-space: pre-wrap; }
    <widget class="QPushButton" name="pushButton_2">
     <property name="geometry">
      <rect>
-      <x>560</x>
-      <y>280</y>
-      <width>51</width>
-      <height>31</height>
+      <x>800</x>
+      <y>420</y>
+      <width>91</width>
+      <height>61</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Lucida Fax</family>
+      <pointsize>20</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>Go!</string>
@@ -81,21 +135,36 @@ p, li { white-space: pre-wrap; }
    <widget class="QComboBox" name="comboBox">
     <property name="geometry">
      <rect>
-      <x>90</x>
-      <y>280</y>
-      <width>411</width>
-      <height>31</height>
+      <x>200</x>
+      <y>420</y>
+      <width>471</width>
+      <height>61</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Lucida Bright</family>
+      <pointsize>16</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
     </property>
     <property name="styleSheet">
      <string notr="true">background-color: rgb(255, 255, 255);
-font: 12pt &quot;Lucida Bright&quot;;</string>
+font: 16pt &quot;Lucida Bright&quot;;</string>
     </property>
     <property name="editable">
      <bool>true</bool>
     </property>
     <property name="currentText">
      <string notr="true">Type your search here ...</string>
+    </property>
+    <property name="maxVisibleItems">
+     <number>7</number>
+    </property>
+    <property name="frame">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>
