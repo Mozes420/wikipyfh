@@ -20,7 +20,8 @@ from PyQt5.QtWidgets import (
     QGroupBox,
     QTextEdit,
     QComboBox,
-    QFrame
+    QFrame,
+    QTextBrowser
 )
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
@@ -40,14 +41,24 @@ import wikipedia
 class DashboardView(QtWidgets.QWidget):
     def __init__(self):
         super(DashboardView, self).__init__()
-        uic.loadUi('dashboardView.ui', self)
+        uic.loadUi('dashboardScreen_2.ui', self)
 
+        self.checker = False
+
+        self.form = self.findChild(QWidget, 'Form')
+        self.frame = self.form.findChild(QFrame, 'frame')
+        self.grid = self.frame.findChild(QGridLayout, 'gridLayout')
+        self.splitter = self.frame.findChild(QSplitter, 'splitter')
+        self.hbox = self.frame.findChild(QHBoxLayout, 'horizontalLayout')
         self.widget = self.findChild(QWidget, 'widget')
-        self.inputQuery_D = self.widget.findChild(QComboBox, 'comboBox')
-        self.buttonThree = self.widget.findChild(QPushButton, 'pushButton')
-        self.buttonFour = self.widget.findChild(QPushButton, 'pushButton_2')
-        #self.blankWidget = self.widget.findChild(QWidget, 'widget')
-        self.blankText = self.widget.findChild(QTextEdit, 'textEdit')
+        self.grid2 = self.widget.findChild(QGridLayout, 'gridLayout_2')
+
+        self.inputQuery_D = self.splitter.findChild(QComboBox, 'comboBox')
+        self.buttonThree = self.splitter.findChild(QPushButton, 'pushButton')
+        self.buttonFour = self.splitter.findChild(QPushButton, 'pushButton_2')
+        self.logo = self.splitter.findChild(QTextBrowser, 'textBrowser')
+
+        self.blankText = self.widget.findChild(QTextEdit, 'textEdit') #################################### here
         self.revsPerUser = self.widget.findChild(QTextEdit, 'textEdit_2')
         self.revsPerDay = self.widget.findChild(QTextEdit, 'textEdit_3')
         self.imgCount = self.widget.findChild(QTextEdit, 'textEdit_4')
@@ -55,6 +66,8 @@ class DashboardView(QtWidgets.QWidget):
         self.canvasCloud = self.widget.findChild(QWidget, 'widget_3')
         self.canvasRevs = self.widget.findChild(QWidget, 'widget_5')
         self.canvasBlank = self.widget.findChild(QWidget, 'widget_4')
+        self.buttonThree.clicked.connect(self.setDropdownItems)
+        self.buttonFour.clicked.connect(self.call)
 
     def setDropdownItems(self):
         print("searching results for: " + self.inputQuery_D.currentText())
@@ -84,7 +97,7 @@ class DashboardView(QtWidgets.QWidget):
         self.canvasTrend.axes.set_xticklabels(labels=dfg.index[:,], rotation=45)
         self.canvasTrend.setMaximumWidth(400)
         self.canvasTrend.setMaximumHeight(300)
-        self.addWidget(self.canvasTrend, Qt.AlignCenter)
+        self.addWidget(self.canvasTrend,1,1, Qt.AlignCenter)
     
 
     # def drawWordCloud(self, text):
@@ -103,13 +116,16 @@ class DashboardView(QtWidgets.QWidget):
     def writeTextWiki(self, text): ########################### WIP 
          self.blankText.setText(text)
          print('writetextwiki')
-         self.addWidget(self.blankText, Qt.AlignCenter)
+         self.addWidget(self.blankText,1,1, Qt.AlignCenter)
         
 
-    def callFunctions(self, text, inp):
-        self.gtrend([inp])
-        #self.drawWordCloud(text)
-        self.writeTextWiki(text)
+    def callFunctions(self):
+        #WikiPy.setCurrentIndex(0)
+        print(self.inputQuery_D.currentText())
+        inp = self.inputQuery_D.currentText()
+        text = getBlankText(inp)[0]
+        #WikiPy.setCurrentIndex(1)
+        #self.callFunctions(text, inp)
 
     def call(self):
         if(self.checker):
