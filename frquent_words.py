@@ -58,10 +58,41 @@ def freqWords(keyword):
     words_final = [x for x in words if not (x.isdigit() or x[0] == '-' and x[1:].isdigit())]
     Count_words = Counter(words_final)
     most_frequent = Count_words.most_common(10)
-    wordcloud = WordCloud(stopwords=stopwords, max_font_size=50, max_words=100, background_color="white").generate(text)"""
-    print(most_frequent)
+    # wordcloud = WordCloud(stopwords=stopwords, max_font_size=50, max_words=100, background_color="white").generate(text)"""
+    x_axis = []
+    y_axis = []
+    for i in most_frequent:
+      x_axis.append(i[0])
+      y_axis.append(i[1])
+    tot_words = len(text_tokenized) # alle Wörter
+    after_stopwords = len(words_final) # ohne stopwords
+    stopword_count = tot_words - after_stopwords # nur stopwords
+    word_percent = after_stopwords/tot_words # anteil an nicht stopwords
+    stopword_number = 1-word_percent # anteil an stopwords
+    stopword_percent = 100 * stopword_number # anteil an stopwords in prozent
+    stop_per_round = round(stopword_percent, 2) # anteil an stopwords in prozent gerundet
+    print(tot_words)
+    print(after_stopwords)
+    print(stopword_count)
+    print(stop_per_round)
+    return most_frequent, x_axis, y_axis, stopword_percent
     
 
-freqWords("natural language processing")
+#freqWords("Natural language Processing")
+#freqWords("1198")
+#freqWords("American Football")
+#freqWords("Barack Obama")
+#freqWords("China")
+#freqWords("1")
+#freqWords("Angela Merkel")
+
+def WordPlot(keyword):
+  most_frequent, x_axis, y_axis, stopword_percent = freqWords(keyword)
+  plt.bar(x_axis, y_axis)
+  plt.ylabel('Word Count')
+  plt.show()
+
+
+WordPlot("Angela Merkel")
 
 
