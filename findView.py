@@ -37,84 +37,17 @@ import wikipedia
 #from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
 
-
-
-#######  WELCOME SCREEN CLASS  ########
-
-class WelcomeScreen(QtWidgets.QDialog):
+class DashboardView(QtWidgets.QWidget):
     def __init__(self):
-        super(WelcomeScreen, self).__init__()
-        uic.loadUi('welcomeScreen.ui', self)
-
-        self.checkerWelcome = False
-        self.testBox = GroupBox()
-
-
-        #Finden der UI-Widgets
-        self.inputQuery = self.findChild(QComboBox, 'comboBox')
-        self.buttonOne = self.findChild(QPushButton, 'pushButton')
-        self.buttonOne.clicked.connect(self.setDropdownItems)
-        self.buttonTwo = self.findChild(QPushButton, 'pushButton_2')
-        self.buttonTwo.clicked.connect(self.call)
-
-
-        #Set Dropdown Items
-    def setDropdownItems(self):
-        print("searching results for: " + self.inputQuery.currentText())
-        list = getDropdownList(self.inputQuery.currentText())
-        self.inputQuery.addItems(list)
-        self.checkerWelcome = True
-        print("done")
-        
-
-        #Fenster wechseln
-    def setIndexToOne(self):
-        print('set index to one function call')
-        WikiPy.setCurrentIndex(1)
-        self.callFunctions()
-        
-
-        #call Functions
-    def callFunctions(self):
-        print(self.inputQuery.currentText())
-        inp = self.inputQuery.currentText()
-        text = getBlankText(inp)[0]
-        self.testBox.callFunctions(text, inp)
-
-
-        #Call Index ändern
-    def call(self):
-        if(self.checkerWelcome):
-            print("creating...")
-            self.setIndexToOne()
-        else: print("You need to get search results first!")
-
-    def changeWindow(self):
-        WikiPy.setCurrentIndex(1)
-
-
-#######  DASHBOARD VIEW CLASS  ########
-
-class GroupBox(QtWidgets.QWidget):
-    def init(self):
-        super(GroupBox, self).__init__()
+        super(DashboardView, self).__init__()
         uic.loadUi('dashboardView.ui', self)
-        
-        #Checker
-        self.checker = False
 
-        #Elemente aus UI laden
-        #self.form = self.findChild(QWidget, 'Form')
-        #self.frame = self.form.findChild(QFrame, 'frame')
-        #self.grid = self.frame.findChild(QGridLayout, 'gridLayout')
-        #self.splitter = self.frame.findChild(QSplitter, 'splitter')
-        #self.hbox = self.frame.findChild(QHBoxLayout, 'horizontalLayout')
         self.widget = self.findChild(QWidget, 'widget')
         self.inputQuery_D = self.widget.findChild(QComboBox, 'comboBox')
         self.buttonThree = self.widget.findChild(QPushButton, 'pushButton')
         self.buttonFour = self.widget.findChild(QPushButton, 'pushButton_2')
         #self.blankWidget = self.widget.findChild(QWidget, 'widget')
-        self.blankText = self.widget.findChild(QTextEdit, 'textEdit') #################################### here
+        self.blankText = self.widget.findChild(QTextEdit, 'textEdit')
         self.revsPerUser = self.widget.findChild(QTextEdit, 'textEdit_2')
         self.revsPerDay = self.widget.findChild(QTextEdit, 'textEdit_3')
         self.imgCount = self.widget.findChild(QTextEdit, 'textEdit_4')
@@ -123,31 +56,11 @@ class GroupBox(QtWidgets.QWidget):
         self.canvasRevs = self.widget.findChild(QWidget, 'widget_5')
         self.canvasBlank = self.widget.findChild(QWidget, 'widget_4')
 
-        #Elemente richtig ordnen
-        self.canvasTrend = FigureCanvas(Figure())
-        self.canvasCloud = FigureCanvas(Figure())
-        self.canvasRevs = FigureCanvas(Figure())
-        self.canvasBlank = FigureCanvas(Figure())
-
-        #Elemente mit Slot verknüpfen
-
-
-     
-
-    def start(self):
-            welcomeScreen = WelcomeScreen()
-            if welcomeScreen.exec_():
-                self.show()
-            else:
-                welcomeScreen.exec_()
-
-    # Funktion muss in die Klasse
-
     def setDropdownItems(self):
         print("searching results for: " + self.inputQuery_D.currentText())
         list = getDropdownList(self.inputQuery_D.currentText())
         self.inputQuery_D.addItems(list)
-        self.buttonThree.clicked.connect(self.callFunctions)
+        self.buttonFour.clicked.connect(self.callFunctions)
         self.checker = True
         print("done")
 
@@ -171,7 +84,7 @@ class GroupBox(QtWidgets.QWidget):
         self.canvasTrend.axes.set_xticklabels(labels=dfg.index[:,], rotation=45)
         self.canvasTrend.setMaximumWidth(400)
         self.canvasTrend.setMaximumHeight(300)
-        #self.grid.addWidget(self.canvasTrend, 1,0, Qt.AlignCenter)
+        self.addWidget(self.canvasTrend, Qt.AlignCenter)
     
 
     # def drawWordCloud(self, text):
@@ -184,13 +97,13 @@ class GroupBox(QtWidgets.QWidget):
     #     self.axes.imshow(wordcloud)
     #     self.canvasCloud.setMaximumWidth(400)
     #     self.canvasCloud.setMaximumHeight(300)
-    #     self.grid.addWidget(self.canvasCloud, 1,1, Qt.AlignCenter)
+    #     self.grid.addWidget(self.canvasCloud, 1,1, PyQt5.QtCore.Qt.AlignCenter)
 
 
     def writeTextWiki(self, text): ########################### WIP 
          self.blankText.setText(text)
          print('writetextwiki')
-         self.hbox.addWidget(self.blankText, 1,2, Qt.AlignCenter)
+         self.addWidget(self.blankText, Qt.AlignCenter)
         
 
     def callFunctions(self, text, inp):
@@ -198,26 +111,19 @@ class GroupBox(QtWidgets.QWidget):
         #self.drawWordCloud(text)
         self.writeTextWiki(text)
 
-
     def call(self):
         if(self.checker):
             self.buttonFour.clicked.connect(self.callFunctions)
             print("creating...")
         else: print("You need to get search results first!")
+        
 
-
-           
-
-
-########  MAIN METHOD  #########
 
 if __name__ == "__main__":
     import sys
     app = QApplication(sys.argv)
     WikiPy = QtWidgets.QStackedWidget()
-    welcomescreen = WelcomeScreen()
-    dashboardview = GroupBox()
-    WikiPy.addWidget(welcomescreen)
+    dashboardview = DashboardView()
     WikiPy.addWidget(dashboardview)
     print(WikiPy.currentIndex())
     WikiPy.show()

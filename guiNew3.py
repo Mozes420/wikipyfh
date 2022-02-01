@@ -45,7 +45,7 @@ from gtrends import gtrend
 
 from vis1 import getBlankText, getURL
 import wikipedia
-from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+#from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
 
 # Einstiegsbildschirm
@@ -224,17 +224,17 @@ class GroupBox(QtWidgets.QWidget):
         self.grid.addWidget(self.canvasTrend, 1,0, PyQt5.QtCore.Qt.AlignCenter)
     
 
-    def drawWordCloud(self, text):
-        stopwords = set(STOPWORDS)
-        stopwords.update(["e.g"])
-        wordcloud = WordCloud(stopwords=stopwords, max_font_size=50, max_words=100, background_color="white").generate(text)
-        self.canvasCloud = FigureCanvas(Figure())
-        self.axes = self.canvasCloud.figure.add_subplot()
-        self.axes.axis('off')
-        self.axes.imshow(wordcloud)
-        self.canvasCloud.setMaximumWidth(400)
-        self.canvasCloud.setMaximumHeight(300)
-        self.grid.addWidget(self.canvasCloud, 1,1, PyQt5.QtCore.Qt.AlignCenter)
+    # def drawWordCloud(self, text):
+    #     stopwords = set(STOPWORDS)
+    #     stopwords.update(["e.g"])
+    #     wordcloud = WordCloud(stopwords=stopwords, max_font_size=50, max_words=100, background_color="white").generate(text)
+    #     self.canvasCloud = FigureCanvas(Figure())
+    #     self.axes = self.canvasCloud.figure.add_subplot()
+    #     self.axes.axis('off')
+    #     self.axes.imshow(wordcloud)
+    #     self.canvasCloud.setMaximumWidth(400)
+    #     self.canvasCloud.setMaximumHeight(300)
+    #     self.grid.addWidget(self.canvasCloud, 1,1, PyQt5.QtCore.Qt.AlignCenter)
 
 
     def writeTextWiki(self, text): ########################### WIP 
@@ -245,7 +245,7 @@ class GroupBox(QtWidgets.QWidget):
 
     def callFunctions(self, text, inp):
         self.gtrend([inp])
-        self.drawWordCloud(text)
+        #self.drawWordCloud(text)
         self.writeTextWiki(text)
 
     def call(self):
