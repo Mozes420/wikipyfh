@@ -35,7 +35,7 @@ import urllib
 from dropdownList import getDropdownList
 from vis1 import getBlankText, getURL
 import wikipedia
-#from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
 
 class DashboardView(QtWidgets.QWidget):
@@ -46,26 +46,41 @@ class DashboardView(QtWidgets.QWidget):
         self.checker = False
 
         self.form = self.findChild(QWidget, 'Form')
-        self.frame = self.form.findChild(QFrame, 'frame')
-        self.grid = self.frame.findChild(QGridLayout, 'gridLayout')
-        self.splitter = self.frame.findChild(QSplitter, 'splitter')
-        self.hbox = self.frame.findChild(QHBoxLayout, 'horizontalLayout')
+        self.frame = self.findChild(QFrame, 'frame')
+        self.grid = self.findChild(QGridLayout, 'gridLayout')
+        self.splitter = self.findChild(QSplitter, 'splitter')
+        self.hbox = self.findChild(QHBoxLayout, 'horizontalLayout')
         self.widget = self.findChild(QWidget, 'widget')
-        self.grid2 = self.widget.findChild(QGridLayout, 'gridLayout_2')
+        self.grid2 = self.findChild(QGridLayout, 'gridLayout_2')
 
-        self.inputQuery_D = self.splitter.findChild(QComboBox, 'comboBox')
-        self.buttonThree = self.splitter.findChild(QPushButton, 'pushButton')
-        self.buttonFour = self.splitter.findChild(QPushButton, 'pushButton_2')
-        self.logo = self.splitter.findChild(QTextBrowser, 'textBrowser')
+        GridLayout = self.grid
+        SplitterLayout = self.splitter
+        HBoxLayout = self.hbox
+        Grid2Layout = self.grid2
 
-        self.blankText = self.widget.findChild(QTextEdit, 'textEdit') #################################### here
-        self.revsPerUser = self.widget.findChild(QTextEdit, 'textEdit_2')
-        self.revsPerDay = self.widget.findChild(QTextEdit, 'textEdit_3')
-        self.imgCount = self.widget.findChild(QTextEdit, 'textEdit_4')
-        self.canvasTrend = self.widget.findChild(QWidget, 'widget_2')
-        self.canvasCloud = self.widget.findChild(QWidget, 'widget_3')
-        self.canvasRevs = self.widget.findChild(QWidget, 'widget_5')
-        self.canvasBlank = self.widget.findChild(QWidget, 'widget_4')
+        #self.layout.addItem(GridLayout, SplitterLayout, HBoxLayout, Grid2Layout)
+
+        # self.layout = QGridLayout(self)
+        # self.groupbox = QGroupBox("Start you Knowledge!", checkable=False)
+        # self.layout.addWidget(self.groupbox)
+
+        self.inputQuery_D = self.findChild(QComboBox, 'comboBox')
+        self.buttonThree = self.findChild(QPushButton, 'pushButton')
+        self.buttonFour = self.findChild(QPushButton, 'pushButton_2')
+        self.logo = self.findChild(QTextBrowser, 'textBrowser')
+
+        self.blankText = self.findChild(QTextEdit, 'textEdit') 
+        self.revsPerUser = self.findChild(QTextEdit, 'textEdit_2')
+        self.revsPerDay = self.findChild(QTextEdit, 'textEdit_3')
+        self.imgCount = self.findChild(QTextEdit, 'textEdit_4')
+        self.canvasTrend = self.findChild(QWidget, 'widget_2')
+        self.canvasTrend = FigureCanvas(Figure())
+        self.canvasCloud = self.findChild(QWidget, 'widget_3')
+        self.canvasCloud = FigureCanvas(Figure())
+        self.canvasRevs = self.findChild(QWidget, 'widget_5')
+        self.canvasRevs = FigureCanvas(Figure())
+        self.canvasBlank = self.findChild(QWidget, 'widget_4')
+        self.canvasBlank = FigureCanvas(Figure())
         self.buttonThree.clicked.connect(self.setDropdownItems)
         self.buttonFour.clicked.connect(self.call)
 
@@ -97,34 +112,32 @@ class DashboardView(QtWidgets.QWidget):
         self.canvasTrend.axes.set_xticklabels(labels=dfg.index[:,], rotation=45)
         self.canvasTrend.setMaximumWidth(400)
         self.canvasTrend.setMaximumHeight(300)
-        self.addWidget(self.canvasTrend,1,1, Qt.AlignCenter)
+        self.grid2.addWidget(self.canvasTrend,0,0, Qt.AlignCenter)
     
 
-    # def drawWordCloud(self, text):
-    #     stopwords = set(STOPWORDS)
-    #     stopwords.update(["e.g"])
-    #     wordcloud = WordCloud(stopwords=stopwords, max_font_size=50, max_words=100, background_color="white").generate(text)
-    #     self.canvasCloud = FigureCanvas(Figure())
-    #     self.axes = self.canvasCloud.figure.add_subplot()
-    #     self.axes.axis('off')
-    #     self.axes.imshow(wordcloud)
-    #     self.canvasCloud.setMaximumWidth(400)
-    #     self.canvasCloud.setMaximumHeight(300)
-    #     self.grid.addWidget(self.canvasCloud, 1,1, PyQt5.QtCore.Qt.AlignCenter)
+    def drawWordCloud(self, text):
+         stopwords = set(STOPWORDS)
+         stopwords.update(["e.g"])
+         wordcloud = WordCloud(stopwords=stopwords, max_font_size=50, max_words=100, background_color="white").generate(text)
+         self.canvasCloud = FigureCanvas(Figure())
+         self.axes = self.canvasCloud.figure.add_subplot()
+         self.axes.axis('off')
+         self.axes.imshow(wordcloud)
+         self.canvasCloud.setMaximumWidth(400)
+         self.canvasCloud.setMaximumHeight(300)
+         self.grid2.addWidget(self.canvasCloud, 0,1, Qt.AlignCenter)
 
 
     def writeTextWiki(self, text): ########################### WIP 
          self.blankText.setText(text)
          print('writetextwiki')
-         self.addWidget(self.blankText,1,1, Qt.AlignCenter)
+         self.hbox.addWidget(self.blankText,0,1, Qt.AlignCenter)
         
 
     def callFunctions(self):
-        #WikiPy.setCurrentIndex(0)
         print(self.inputQuery_D.currentText())
         inp = self.inputQuery_D.currentText()
         text = getBlankText(inp)[0]
-        #WikiPy.setCurrentIndex(1)
         #self.callFunctions(text, inp)
 
     def call(self):
