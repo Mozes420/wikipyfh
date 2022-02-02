@@ -96,10 +96,9 @@ def StopWordPlot(keyword):
   most_frequent, x_axis, y_axis, after_stopwords, stopword_count = freqWords(keyword)
   labels = "normal Words", "Stopwords"
   sizes = [after_stopwords, stopword_count]
-  fig1, ax1 = plt.subplots()
-  ax1.pie(sizes, labels=labels, autopct='%1.1f%%',
+  plt.pie(sizes, labels=labels, autopct='%1.1f%%',
         shadow=True, startangle=90)
-  ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+  plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
   plt.show() 
 
 WordPlot("Angela Merkel")
