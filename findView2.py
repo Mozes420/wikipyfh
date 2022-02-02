@@ -42,17 +42,10 @@ from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 class DashboardView(QtWidgets.QWidget):
     def __init__(self):
         super(DashboardView, self).__init__()
-        uic.loadUi('dashboardScreen_2.ui', self)
+        uic.loadUi('dashboardView.ui', self)
 
         self.checker = False
 
-        self.form = self.findChild(QWidget, 'Form')
-        self.frame = self.findChild(QFrame, 'frame')
-        self.grid = self.findChild(QGridLayout, 'gridLayout')
-        self.splitter = self.findChild(QSplitter, 'splitter')
-        self.hbox = self.findChild(QHBoxLayout, 'horizontalLayout')
-        self.widget = self.findChild(QWidget, 'widget')
-        self.grid2 = self.findChild(QGridLayout, 'gridLayout_2')
 
         self.inputQuery_D = self.findChild(QComboBox, 'comboBox')
         self.buttonThree = self.findChild(QPushButton, 'pushButton')
@@ -74,13 +67,19 @@ class DashboardView(QtWidgets.QWidget):
         self.buttonThree.clicked.connect(self.setDropdownItems)
         self.buttonFour.clicked.connect(self.call)
 
-        self.mainLayout = QLayout()
-        self.mainLayout.addChildLayout()
-
-
-        self.grid2.addWidget(self.canvasCloud,0,0, Qt.QtCore.AlignCenter)
-        self.grid2.addWidget(self.canvasTrend,0,1, Qt.QtCore.AlignCenter)
-        self.hbox.addWidget(self.blankText, )
+        self.view = QGridLayout()
+        self.view.addWidget(self.buttonThree)
+        self.view.addWidget(self.buttonFour)
+        self.view.addWidget(self.inputQuery_D)
+        self.view.addWidget(self.logo)
+        self.view.addWidget(self.revsPerUser)
+        self.view.addWidget(self.revsPerDay)
+        self.view.addWidget(self.imgCount)
+        self.view.addWidget(self.canvasTrend)
+        self.view.addWidget(self.canvasRevs)
+        self.view.addWidget(self.canvasBlank)
+        self.view.addWidget(self.canvasCloud)
+        self.setLayout(self.view)
 
 
     def setDropdownItems(self):
@@ -111,7 +110,7 @@ class DashboardView(QtWidgets.QWidget):
         self.canvasTrend.axes.set_xticklabels(labels=dfg.index[:,], rotation=45)
         self.canvasTrend.setMaximumWidth(400)
         self.canvasTrend.setMaximumHeight(300)
-        self.grid2.addWidget(self.canvasTrend,0,0)
+        self.view.addWidget(self.canvasTrend)
     
 
     def drawWordCloud(self, text):
@@ -124,23 +123,20 @@ class DashboardView(QtWidgets.QWidget):
          self.axes.imshow(wordcloud)
          self.canvasCloud.setMaximumWidth(400)
          self.canvasCloud.setMaximumHeight(300)
-         self.grid2.addWidget(self.canvasCloud, 0,1)
+         self.canvasCloud.draw()
+         self.view.addWidget(self.canvasCloud)
 
-
-    def writeTextWiki(self, text): ########################### WIP 
+    def writeTextWiki(self, text):
          self.blankText.setText(text)
          print('writetextwiki')
-         self.hbox.addWidget(self.blankText,0,1)
+         self.view.addWidget(self.blankText)
         
 
     def callFunctions(self):
         print(self.inputQuery_D.currentText())
         inp = self.inputQuery_D.currentText()
         text = getBlankText(inp)[0]
-        self.gtrend([inp])
-        self.drawWordCloud(inp)
-        self.writeTextWiki(text)
-
+        #self.callFunctions(text, inp)
 
 
     def call(self):

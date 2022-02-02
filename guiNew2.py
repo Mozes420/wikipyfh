@@ -195,7 +195,7 @@ class GroupBox(QtWidgets.QWidget):
 
     def callFunctions(self, text, inp):
         self.gtrend([inp])
-        #self.drawWordCloud(text)
+        self.drawWordCloud(text)
         self.writeTextWiki(text)
 
 

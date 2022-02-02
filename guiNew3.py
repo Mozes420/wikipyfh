@@ -10,7 +10,10 @@ from PyQt5.QtWidgets import (
     QGridLayout,
     QGroupBox,
     QTextEdit,
-    QComboBox
+    QComboBox,
+    QHBoxLayout,
+    QFormLayout,
+    QVBoxLayout
 )
 import PyQt5.QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvas
@@ -45,7 +48,7 @@ from gtrends import gtrend
 
 from vis1 import getBlankText, getURL
 import wikipedia
-#from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
 
 # Einstiegsbildschirm
@@ -124,7 +127,7 @@ class GroupBox(QtWidgets.QWidget):
         y_move_step = (screen.height() - form.height())
         self.move(int(x_move_step/2), int(y_move_step/2))
     
-        self.layout = QGridLayout(self)
+        self.layout = QVBoxLayout(self)
         self.groupbox = QGroupBox("Start you Knowledge!", checkable=False)
         self.layout.addWidget(self.groupbox)
 
@@ -160,27 +163,48 @@ class GroupBox(QtWidgets.QWidget):
         self.canvasTrend = FigureCanvas(Figure())
         self.canvasTrend.setParent(self)
         self.canvasTrend.setMaximumWidth(400)
-        self.canvasTrend.setMaximumHeight(300)
+        self.canvasTrend.setMaximumHeight(200)
 
         self.canvasCloud = FigureCanvas(Figure())
         self.canvasCloud.setParent(self)
         self.canvasCloud.setMaximumWidth(400)
-        self.canvasCloud.setMaximumHeight(300)
+        self.canvasCloud.setMaximumHeight(200)
 
         self.blankText = QTextEdit(self) ################ WORK IN PROGRESS
         self.blankText.setMinimumWidth(300)
-        self.blankText.setMinimumHeight(400)
+        self.blankText.setMinimumHeight(600)
         self.blankText.setParent(self)
 
+        self.canvasRevs = FigureCanvas(Figure())
+        self.canvasRevs.setParent(self)
+        self.canvasRevs.setMaximumWidth(400)
+        self.canvasRevs.setMaximumHeight(200)
+
+        self.outerLayout = QVBoxLayout()
+        self.topLayout = QHBoxLayout()
         self.grid = QGridLayout()
-        self.groupbox.setLayout(self.grid)
+        self.textLayout = QHBoxLayout()
+
+        self.groupbox.setLayout(self.outerLayout)
         #self.grid.addWidget(self.input, 0,0,1,3, PyQt5.QtCore.Qt.AlignCenter)
-        self.grid.addWidget(self.button, 0,0,1,2, PyQt5.QtCore.Qt.AlignRight)
-        self.grid.addWidget(self.button2, 0,1,1,2, PyQt5.QtCore.Qt.AlignRight)
-        self.grid.addWidget(self.canvasTrend, 1,0, PyQt5.QtCore.Qt.AlignCenter)
-        self.grid.addWidget(self.canvasCloud, 1,1, PyQt5.QtCore.Qt.AlignCenter)
-        self.grid.addWidget(self.blankText, 1,2, PyQt5.QtCore.Qt.AlignCenter) ####################### WIP
-        self.grid.addWidget(self.comboBox, 0,0,1,2, PyQt5.QtCore.Qt.AlignCenter)
+        self.topLayout.addWidget(self.comboBox)
+        self.topLayout.addWidget(self.button)
+        self.topLayout.addWidget(self.button2)
+
+        self.textLayout.addWidget(self.blankText, PyQt5.QtCore.Qt.AlignRight)
+
+        self.grid.addWidget(self.canvasTrend, 1,0, PyQt5.QtCore.Qt.AlignTop)
+        self.grid.addWidget(self.canvasCloud, 1,1, PyQt5.QtCore.Qt.AlignTop)
+        self.grid.addWidget(self.canvasRevs, 2,0, PyQt5.QtCore.Qt.AlignTop)
+        #self.grid.addWidget(self.blankText, 1,2, PyQt5.QtCore.Qt.AlignCenter)
+
+        self.outerLayout.addLayout(self.topLayout)
+        self.textLayout.addLayout(self.grid)
+        self.outerLayout.addLayout(self.textLayout)
+
+
+
+
 
     # Funktion aufrufen Welcome Screen
 
@@ -224,17 +248,17 @@ class GroupBox(QtWidgets.QWidget):
         self.grid.addWidget(self.canvasTrend, 1,0, PyQt5.QtCore.Qt.AlignCenter)
     
 
-    # def drawWordCloud(self, text):
-    #     stopwords = set(STOPWORDS)
-    #     stopwords.update(["e.g"])
-    #     wordcloud = WordCloud(stopwords=stopwords, max_font_size=50, max_words=100, background_color="white").generate(text)
-    #     self.canvasCloud = FigureCanvas(Figure())
-    #     self.axes = self.canvasCloud.figure.add_subplot()
-    #     self.axes.axis('off')
-    #     self.axes.imshow(wordcloud)
-    #     self.canvasCloud.setMaximumWidth(400)
-    #     self.canvasCloud.setMaximumHeight(300)
-    #     self.grid.addWidget(self.canvasCloud, 1,1, PyQt5.QtCore.Qt.AlignCenter)
+    def drawWordCloud(self, text):
+         stopwords = set(STOPWORDS)
+         stopwords.update(["e.g"])
+         wordcloud = WordCloud(stopwords=stopwords, max_font_size=50, max_words=100, background_color="white").generate(text)
+         self.canvasCloud = FigureCanvas(Figure())
+         self.axes = self.canvasCloud.figure.add_subplot()
+         self.axes.axis('off')
+         self.axes.imshow(wordcloud)
+         self.canvasCloud.setMaximumWidth(400)
+         self.canvasCloud.setMaximumHeight(300)
+         self.grid.addWidget(self.canvasCloud, 1,1, PyQt5.QtCore.Qt.AlignCenter)
 
 
     def writeTextWiki(self, text): ########################### WIP 
@@ -244,8 +268,9 @@ class GroupBox(QtWidgets.QWidget):
         
 
     def callFunctions(self, text, inp):
+        inp = self.comboBox.currentText()
         self.gtrend([inp])
-        #self.drawWordCloud(text)
+        self.drawWordCloud(text)
         self.writeTextWiki(text)
 
     def call(self):
