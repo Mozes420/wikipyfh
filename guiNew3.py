@@ -1,4 +1,10 @@
+# Systeme
+import sys
+import numpy as np
+import os
 from webbrowser import get
+
+# Pyqt5 dependancies
 import PyQt5.QtWidgets as QtWidgets
 from PyQt5.QtWidgets import (
     QDialog,
@@ -22,21 +28,19 @@ from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
 from dropdownList import getDropdownList
 from PyQt5 import uic
-import sys
-import random
 from random import choice
 from crawlerlib import getSoup
-#from gtrends import gtrend
-import numpy as np
 from PyQt5 import QtGui
+
 # for gtrends
 import pandas as pd
 from pytrends.request import TrendReq
 import matplotlib.pyplot as plt
+from crawlerlib import getRevisions, getImgCnt, getRevsPerUser, getRevsPerDay
 
 # for plotting in qt
-#import pyqtgraph as pg
-#from pyqtgraph import PlotWidget, plot
+import pyqtgraph as pg
+from pyqtgraph import PlotWidget, plot
 
 # for crawlerlib
 from bs4 import BeautifulSoup
@@ -45,8 +49,8 @@ import pandas as pd
 import datetime
 import re
 import urllib
-from gtrends import gtrend
 
+# vis und wiki
 from vis1 import getBlankText, getURL
 import wikipedia
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
@@ -130,18 +134,9 @@ class GroupBox(QtWidgets.QWidget):
         #         background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(217, 224, 255, 255), stop:1 rgba(255, 255, 255, 255));
         #         }
         #     ''')
-    
-        self.layout = QHBoxLayout(self)
-        self.groupbox = QGroupBox("Start you Knowledge!", checkable=False)
-        self.layout.addWidget(self.groupbox)
 
-        # Einfügen von Text Input Feld
 
-        self.input = QLineEdit("Type your search ...")
-        self.input.setMaximumHeight(100)
-        self.input.setMaximumWidth(400)
-
-        # Einfügen von Button der Anfragen mit Input des Line Edit startet
+        # Einfügen von Buttons und Combo Box für Dropdown Feld
         ##########################################################
         self.button = QPushButton("Get Search Results")
         self.button.setParent(self)
@@ -163,19 +158,36 @@ class GroupBox(QtWidgets.QWidget):
 
         # Einfügen von KPI Boxen
         #############################################################
+        font = QtGui.QFont()
+        font.setPointSize(16)
+        fontNumber = QtGui.QFont()
+        fontNumber.setPointSize(22)
+
         self.revsPerDayText = QTextBrowser()
         self.revsPerDayText.setText('Revisions per Day')
+        self.revsPerDayText.setAlignment(PyQt5.QtCore.Qt.AlignCenter)
+        self.revsPerDayText.setFont(font)
         self.revsPerUserText = QTextBrowser()
         self.revsPerUserText.setText('Revisions per User')
+        self.revsPerUserText.setAlignment(PyQt5.QtCore.Qt.AlignCenter)
+        self.revsPerUserText.setFont(font)
         self.imgCountText = QTextBrowser()
         self.imgCountText.setText('Image Count')
+        self.imgCountText.setAlignment(PyQt5.QtCore.Qt.AlignCenter)
+        self.imgCountText.setFont(font)
 
         self.revsPerDayKPI = QTextBrowser()
         self.revsPerDayKPI.setText('0')
+        self.revsPerDayKPI.setAlignment(PyQt5.QtCore.Qt.AlignCenter)
+        self.revsPerDayKPI.setFont(fontNumber)
         self.revsPerUserKPI = QTextBrowser()
         self.revsPerUserKPI.setText('0')
+        self.revsPerUserKPI.setAlignment(PyQt5.QtCore.Qt.AlignCenter)
+        self.revsPerUserKPI.setFont(fontNumber)
         self.imgCountKPI = QTextBrowser()
         self.imgCountKPI.setText('0')
+        self.imgCountKPI.setAlignment(PyQt5.QtCore.Qt.AlignCenter)
+        self.imgCountKPI.setFont(fontNumber)
 
 
         # Einfügen von befüllten Widgets
@@ -208,6 +220,11 @@ class GroupBox(QtWidgets.QWidget):
 
         # Erstellen des Layouts
         #############################################################
+
+        self.layout = QHBoxLayout(self)
+        self.groupbox = QGroupBox("Start you Knowledge!", checkable=False)
+        self.layout.addWidget(self.groupbox)
+
         self.outerLayout = QVBoxLayout()
         self.topLayout = QHBoxLayout()
         self.grid = QGridLayout()
@@ -266,27 +283,41 @@ class GroupBox(QtWidgets.QWidget):
         print("done")
 
 
-    # def gtrend(self, input):
-    #      pytrends = TrendReq(hl='en-US', tz=360)
-    #      pytrends.build_payload(input, cat=0, timeframe='2020-01-01 2022-01-31', geo='US', gprop='')
-    #      keywords = pytrends.suggestions(keyword=input[0])
-    #      df = pd.DataFrame(keywords)
-    #      df.drop(columns= 'mid')
-    #      dfg = pytrends.interest_over_time().drop(labels=['isPartial'],axis='columns')
-    #      self.canvasTrend = FigureCanvas(Figure())
-    #      self.canvasTrend.axes = self.canvasTrend.figure.add_subplot(111)
-    #      self.canvasTrend.axes.clear()
-    #      self.canvasTrend.axes.set_title('Relative Search Term Frequency')
-    #      self.canvasTrend.axes.plot(dfg)
-    #      self.canvasTrend.axes.legend((dfg[0:0]),loc='upper right')
-    #      self.canvasTrend.draw()
-    #      self.canvasTrend.axes.set_xlabel('Time')
-    #      self.canvasTrend.axes.set_ylabel('Frequency')
-    #      self.canvasTrend.axes.set_xticklabels(labels=dfg.index[:,], rotation=45)
-    #      self.canvasTrend.setMaximumWidth(400)
-    #      self.canvasTrend.setMaximumHeight(300)
-    #      self.grid.addWidget(self.canvasTrend, 1,0, PyQt5.QtCore.Qt.AlignCenter)
-    
+    def gtrend(self, input):
+          pytrends = TrendReq(hl='en-US', tz=360)
+          pytrends.build_payload(input, cat=0, timeframe='2020-01-01 2022-01-31', geo='US', gprop='')
+          keywords = pytrends.suggestions(keyword=input[0])
+          df = pd.DataFrame(keywords)
+          df.drop(columns= 'mid')
+          dfg = pytrends.interest_over_time().drop(labels=['isPartial'],axis='columns')
+          self.canvasTrend = FigureCanvas(Figure())
+          self.canvasTrend.axes = self.canvasTrend.figure.add_subplot(111)
+          self.canvasTrend.axes.clear()
+          self.canvasTrend.axes.set_title('Relative Search Term Frequency')
+          self.canvasTrend.axes.plot(dfg)
+          self.canvasTrend.axes.legend((dfg[0:0]),loc='upper right')
+          self.canvasTrend.draw()
+          self.canvasTrend.axes.set_xlabel('Time')
+          self.canvasTrend.axes.set_ylabel('Frequency')
+          self.canvasTrend.axes.set_xticklabels(labels=dfg.index[:,], rotation=45)
+          self.canvasTrend.setMaximumWidth(400)
+          self.canvasTrend.setMaximumHeight(300)
+          self.grid.addWidget(self.canvasTrend, 1,0, PyQt5.QtCore.Qt.AlignTop)
+
+    def getRevPlot(self, wikititle):
+          revplot = getRevisions(wikititle)
+          revplot0 = revplot.drop(columns = ['revid', 'parentid', 'minor', 'comment', 'anon', 'commenthidden'])
+          revplot1 = revplot0[revplot.timestamp.between('2015-01-01', '2021-12-31', inclusive=False)]
+          revplot2 = revplot1.set_index('timestamp')
+          revplot3 = revplot2.groupby(pd.Grouper(freq='M')).count()
+          self.canvasRevs = FigureCanvas(Figure())
+          self.canvasRevs.axes = self.canvasRevs.figure.add_subplot(111)
+          self.canvasRevs.axes.clear()
+          self.canvasRevs.axes.set_title('asdf')
+          self.canvasRevs.axes.plot(revplot3)
+          self.canvasRevs.draw()
+          self.grid.addWidget(self.canvasRevs, 1,0, PyQt5.QtCore.Qt.AlignTop)
+
 
     def drawWordCloud(self, text):
          stopwords = set(STOPWORDS)
@@ -298,20 +329,33 @@ class GroupBox(QtWidgets.QWidget):
          self.axes.imshow(wordcloud)
          self.canvasCloud.setMaximumWidth(400)
          self.canvasCloud.setMaximumHeight(300)
-         self.grid.addWidget(self.canvasCloud, 1,1, PyQt5.QtCore.Qt.AlignCenter)
+         self.grid.addWidget(self.canvasCloud, 1,1, PyQt5.QtCore.Qt.AlignTop)
 
 
     def writeTextWiki(self, text):
          self.blankText.setText(text)
          print('writetextwiki')
-         self.grid.addWidget(self.blankText, 1,2, PyQt5.QtCore.Qt.AlignCenter)
-        
+         self.grid.addWidget(self.blankText, 1,2, PyQt5.QtCore.Qt.AlignTop)
+
+    def getImgCount(self, text):
+        self.imgCountKPI.setText(getImgCnt(text))
+
+    def getRevsPerU(self, text):
+        self.revsPerUserKPI.setText(getRevsPerUser(text))
+
+    def getRevsPerD(self, text):
+        self.revsPerDayKPI.setText(getRevsPerDay(text))
+
 
     def callFunctions(self, text, inp):
         inp = self.comboBox.currentText()
         #self.gtrend([inp])
         self.drawWordCloud(text)
         self.writeTextWiki(text)
+        #self.getRevPlot(text)
+        #self.getImgCount(text)
+        #self.getRevsPerU(text)
+        #self.getRevsPerD(text)
 
     def call(self):
         if(self.checker):
