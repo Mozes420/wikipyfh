@@ -38,10 +38,6 @@ from pytrends.request import TrendReq
 import matplotlib.pyplot as plt
 from crawlerlib import getRevisions, getImgCnt, getRevsPerUser, getRevsPerDay
 
-# for plotting in qt
-import pyqtgraph as pg
-from pyqtgraph import PlotWidget, plot
-
 # for crawlerlib
 from bs4 import BeautifulSoup
 import requests
