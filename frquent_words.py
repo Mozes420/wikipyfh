@@ -6,6 +6,8 @@ import re
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import spacy
+en = spacy.load('en_core_web_sm')
 from collections import Counter
 
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
@@ -48,7 +50,7 @@ def freqWords(keyword):
     text = getBlankText(keyword)[0]
     text_c = re.sub('[\W_]+', ' ', text)
     text_tokenized = nltk.tokenize.word_tokenize(text_c)
-    stopwords = set(STOPWORDS)
+    stopwords = en.Defaults.stop_words
     stopwords.update(["e.g", "e", "g", "The"])
     text_sw = [word for word in text_tokenized if not word in stopwords]
     words = []
@@ -75,7 +77,7 @@ def freqWords(keyword):
     print(after_stopwords)
     print(stopword_count)
     print(stop_per_round)
-    return most_frequent, x_axis, y_axis, stopword_percent
+    return most_frequent, x_axis, y_axis, after_stopwords, stopword_count
     
 
 #freqWords("Natural language Processing")
@@ -103,4 +105,3 @@ def StopWordPlot(keyword):
 
 WordPlot("Angela Merkel")
 StopWordPlot("Angela Merkel")
-
