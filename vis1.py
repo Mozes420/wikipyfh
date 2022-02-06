@@ -5,7 +5,9 @@ import re
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-#from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+import spacy
+en = spacy.load('en_core_web_sm')
+from wordcloud import WordCloud, ImageColorGenerator
 
 # Funktion zum Erhalten der Wikipedia-URL, erlaubt bis zu 2 Tippfehler und wirft bestes Ergebnis aus: 
 
@@ -41,13 +43,13 @@ def getBlankText(keyword):
   #print(content[0:50],'...')
   return content, textFull
 
-#page1 = getBlankText('nlp')
+"""def drawWordCloud(self, text):
+  stopwords = en.Defaults.stop_words
+  stopwords.update(["e.g"])
+  wordcloud = WordCloud(stopwords=stopwords, max_font_size=50, max_words=100, background_color="white").generate(text)
+  plt.figure()
+  plt.imshow(wordcloud, interpolation="bilinear")
+  plt.axis("off")
+  plt.show()"""
 
-#stopwords = set(STOPWORDS)
-#stopwords.update(["e.g"])
-
-# wordcloud = WordCloud(stopwords=stopwords, max_font_size=50, max_words=100, background_color="white").generate(page1)
-# plt.figure()
-# plt.imshow(wordcloud, interpolation="bilinear")
-# plt.axis("off")
-# plt.show()
+# drawWordCloud('natrual language processing')
