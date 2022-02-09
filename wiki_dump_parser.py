@@ -71,10 +71,12 @@ def xml_to_csv(filename):
         if _current_tag == 'id':
           contributor_id = data
         elif _current_tag == 'username':
-          contributor_name = '|' + data + '|'
+          username = data.replace(";", ":")
+          contributor_name = '|' + username + '|'
         elif _current_tag == 'ip':
           contributor_id = data
           contributor_name = 'Anonymous'
+        
 
   def end_tag(tag):
     nonlocal output_csv, _current_tag, _parent
