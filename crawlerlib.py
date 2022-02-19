@@ -17,12 +17,6 @@ def getSoup(wikipage):
 	soup = BeautifulSoup(page.content, 'html.parser')
 	return soup
 	
-def getSoup_wTitle(wikititle):
-	page = requests.get("https://en.wikipedia.org/wiki/"+wikititle)
-		
-	soup = BeautifulSoup(page.content, 'html.parser')
-	return soup
-	
 def getHeadline(wikipage):
 	#article name / headline
 	soup = getSoup(wikipage)
@@ -260,8 +254,15 @@ def getRevsPerUser(wikititle):
 		result_df = result_df.append(input, ignore_index=True)
 	return result_df
 
+# get whole url of first articleversion with pagetitle (wikititle)
 def getOldSoup(wikititle):
 	soup = requests.get("https://en.wikipedia.org/w/index.php?title="+wikititle+"&dir=prev&action=history")
 	soup = BeautifulSoup(soup.content, 'html.parser')
 	soup = soup.findAll("a", {"class": "mw-changeslist-date"})[0]['href']
 	return 'https://en.wikipedia.org/'+soup
+
+# get whole url of recent articleversion with pagetitle (wikititle)
+def getRecentSoup(wikititle):
+	wiki = 'https://en.wikipedia.org/wiki/'
+	recent = wiki+wikititle
+	return recent
