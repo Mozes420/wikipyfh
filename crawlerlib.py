@@ -189,7 +189,7 @@ def getImages(wikipage):
 			pass
 	return img_links
 	
-def getRevisions(wikititle):
+def getRevisions(wikititle):	
 	url = "https://en.wikipedia.org/w/api.php?action=query&format=xml&prop=revisions&rvlimit=500&titles="+wikititle 
 	revisions = []                                        #list of all accumulated revisions
 	next = ''                                             #information for the next request
@@ -254,12 +254,8 @@ def getRevsPerUser(wikititle):
 		result_df = result_df.append(input, ignore_index=True)
 	return result_df
 
-
-def getrevplot(wikititle):
-	revplot = getRevisions(wikititle)
-	revplot0 = revplot.drop(columns = ['revid', 'parentid', 'minor', 'comment', 'anon', 'commenthidden'])
-	revplot1 = revplot0[revplot.timestamp.between('2015-01-01', '2021-12-31', inclusive=False)]
-	revplot2 = revplot1.set_index('timestamp')
-	revplot3 = revplot2.groupby(pd.Grouper(freq='M')).count()
-	plt.figure()
-	plt.plot(revplot3, 'k')
+def getOldSoup(wikititle):
+	soup = requests.get("https://en.wikipedia.org/w/index.php?title="+wikititle+"&dir=prev&action=history")
+	soup = BeautifulSoup(soup.content, 'html.parser')
+	soup = soup.findAll("a", {"class": "mw-changeslist-date"})[0]['href']
+	return 'https://en.wikipedia.org/'+soup
