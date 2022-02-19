@@ -17,6 +17,12 @@ def getSoup(wikipage):
 	soup = BeautifulSoup(page.content, 'html.parser')
 	return soup
 	
+def getSoup_wTitle(wikititle):
+	page = requests.get("https://en.wikipedia.org/wiki/"+wikititle)
+		
+	soup = BeautifulSoup(page.content, 'html.parser')
+	return soup
+	
 def getHeadline(wikipage):
 	#article name / headline
 	soup = getSoup(wikipage)
