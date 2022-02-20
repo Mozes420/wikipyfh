@@ -33,6 +33,7 @@ def getTextBody(wikipage, setblock = True):
 	except:
 		print('No table found')
 
+
 	try:
 		for tag in body.findAll('div', {'class':'shortdescription nomobile noexcerpt noprint searchaux'}):
 			tag.decompose()
@@ -267,6 +268,7 @@ def getRecentSoup(wikititle):
 	recent = wiki+wikititle
 	return recent
 
+# get original text and recent text per article
 def getTextDF(urlis):
     textdf = pd.DataFrame(columns=['page_title', 'original', 'recent'])
     for i in range(len(urlis)):
@@ -277,3 +279,52 @@ def getTextDF(urlis):
             s2 = str(getTextBody(urlis[i][1]))
             textdf = textdf.append({'page_title' : str.rsplit(urlis[i][1], '/', 1)[-1], 'original' : s1, 'recent' : s2}, ignore_index=True)
     return textdf
+
+# get vocabularity density for given text
+def getVD(text):
+  tokens = nltk.word_tokenize(text)
+  tagged = nltk.pos_tag(tokens)
+  nn = []
+  ok = 'NN' 
+  for i in tagged:
+    if ok == i[1]:
+      nn.append(i[0])
+  nn1 = [re.sub('[^a-zA-Z0-9]+', '', _) for _ in nn]
+  nn2 = []
+  for i in nn1:
+    if len(i) > 2:
+      nn2.append(i)
+    else:
+      nn2.append('no text')
+  try:
+    VD = len(np.unique(nn2)) / len(nn2)
+  except ZeroDivisionError:
+    VD = 1
+  return VD
+
+# get words per sentence for given text
+def getWPS(text):
+  tokens = nltk.word_tokenize(text)
+  words = tokens
+  sentences = [[]]
+  ends = set(".?!;:")
+  for word in words:
+    if word in ends: 
+      sentences.append([])
+    else: 
+      sentences[-1].append(word)
+  if sentences[0]:
+    if not sentences[-1]: sentences.pop()
+    wps = sum(len(s) for s in sentences)/len(sentences)
+    #print("average words per sentence: ", wps)
+    return wps
+
+# get words per text for given text
+def getWPT(text):
+    tokens = nltk.word_tokenize(text)
+    words = tokens
+    sentences = [[]]
+    for word in words:
+        sentences.append([word])
+    wpt = len(sentences)
+    return wpt
