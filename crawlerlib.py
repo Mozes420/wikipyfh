@@ -266,3 +266,14 @@ def getRecentSoup(wikititle):
 	wiki = 'https://en.wikipedia.org/wiki/'
 	recent = wiki+wikititle
 	return recent
+
+def getTextDF(urlis):
+    textdf = pd.DataFrame(columns=['page_title', 'original', 'recent'])
+    for i in range(len(urlis)):
+        if str(getTextBody(urlis[i][0])).startswith('Redirect to'):
+            continue
+        else:
+            s1 = str(getTextBody(urlis[i][0]))
+            s2 = str(getTextBody(urlis[i][1]))
+            textdf = textdf.append({'page_title' : str.rsplit(urlis[i][1], '/', 1)[-1], 'original' : s1, 'recent' : s2}, ignore_index=True)
+    return textdf
