@@ -9,6 +9,14 @@ import shutil
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
+import difflib
+import wikipedia
+import nltk
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('maxent_ne_chunker')
+nltk.download('words')
+import matplotlib as mpl
 
 def getSoup(wikipage):
 	#get page to soup
@@ -91,7 +99,7 @@ def getTextBody(wikipage, setblock = True):
 		for e in headlines_body:
 			if e == i:
 				headlines_body.remove(e)
-				print(z)
+				#print(z)
 				text_body.pop(z)
 			else:
 				z += 1
@@ -328,3 +336,79 @@ def getWPT(text):
         sentences.append([word])
     wpt = len(sentences)
     return wpt
+
+# function to tokenize and equalize 2 given texts
+def tokenize(s):
+    return re.split('\s+', s)
+def untokenize(ts):
+    return ' '.join(ts)
+        
+def equalize(s1, s2):
+    l1 = tokenize(s1)
+    l2 = tokenize(s2)
+    res1 = []
+    res2 = []
+    prev = difflib.Match(0,0,0)
+    for match in difflib.SequenceMatcher(a=l1, b=l2).get_matching_blocks():
+        if (prev.a + prev.size != match.a):
+            for i in range(prev.a + prev.size, match.a):
+                res2 += ['_' * len(l1[i])]
+            res1 += l1[prev.a + prev.size:match.a]
+        if (prev.b + prev.size != match.b):
+            for i in range(prev.b + prev.size, match.b):
+                res1 += ['_' * len(l2[i])]
+            res2 += l2[prev.b + prev.size:match.b]
+        res1 += l1[match.a:match.a+match.size]
+        res2 += l2[match.b:match.b+match.size]
+        prev = match
+    return untokenize(res1), untokenize(res2)
+
+# function to visualize comparison of texts human-readable
+def insert_newlines(string, every=40, window=10):
+    result = []
+    from_str = string
+    while len(from_str) > 0:
+        cut_off = every
+        if len(from_str) > every:
+            while (from_str[cut_off - 1] != ' ') and (cut_off > (every-window)):
+                cut_off -= 1
+        else:
+            cut_off = len(from_str)
+        part = from_str[:cut_off]
+        result += [part]
+        from_str = from_str[cut_off:]
+    return result
+
+# tokenize, equalize and show comparison of texts
+def show_comparison(s1, s2, width=40, margin=10, sidebyside=True, compact=False):
+    s1, s2 = equalize(s1,s2)
+
+    if sidebyside:
+        s1 = insert_newlines(s1, width, margin)
+        s2 = insert_newlines(s2, width, margin)
+        if compact:
+            for i in range(0, len(s1)):
+                lft = re.sub(' +', ' ', s1[i].replace('_', '')).ljust(width)
+                rgt = re.sub(' +', ' ', s2[i].replace('_', '')).ljust(width) 
+                print(lft + ' | ' + rgt + ' | ')        
+        else:
+            for i in range(0, len(s1)):
+                lft = s1[i].ljust(width)
+                rgt = s2[i].ljust(width)
+                print(lft + ' | ' + rgt + ' | ')
+    else:
+        print(s1)
+        print(s2)
+
+# gets original and recent texts from wikipedia-articles by iterating through the urls
+# that are extracted from the dataframe into a zipped list ("urlis")
+def getTextDF(urlis):
+    textdf = pd.DataFrame(columns=['page_title', 'original', 'recent'])
+    for i in range(len(urlis)):
+        if str(getTextBody(urlis[i][0])).startswith('Redirect to'):
+            continue
+        else:
+            s1 = str(getTextBody(urlis[i][0]))
+            s2 = str(getTextBody(urlis[i][1]))
+            textdf = textdf.append({'page_title' : str.rsplit(urlis[i][1], '/', 1)[-1], 'original' : s1, 'recent' : s2}, ignore_index=True)
+    return textdf
